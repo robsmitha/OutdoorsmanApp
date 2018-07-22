@@ -1,0 +1,14 @@
+<resources>
+
+  <style name="AppTheme" parent="MaterialDemo">
+	<item
+	name="android:windowContentTransitions">true</item>
+	 <item
+	name="android:windowSharedElementEnterTransition">
+	@android:transition/slide_right</item>
+	 <item
+	name="android:windowSharedElementExitTransition">
+	@android:transition/slide_left</item>
+	</style>
+
+</resources>
