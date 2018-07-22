@@ -7,8 +7,13 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -19,7 +24,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getCanonicalName();
     private Toolbar mToolbar;
     private ArrayList<HarvestRecord> HarvestRecordArrayList;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,11 +32,16 @@ public class MainActivity extends AppCompatActivity {
         mToolbar = (Toolbar) findViewById(R.id.action_bar);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(true);
+        getSupportActionBar().setIcon(R.drawable.ic_public_black_24dp);
 
         AccountFragment accountFragment = new AccountFragment();
         OnFragmentReplaced(accountFragment);
-    }
 
+
+
+
+    }
     //Temporary ArrayList methods for testing
     public ArrayList<HarvestRecord> getHarvestRecordArrayList() {
         if(HarvestRecordArrayList == null){
@@ -77,6 +86,17 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_record_list:
                 RecordListFragment recordListFragment = new RecordListFragment();
                 OnFragmentReplaced(recordListFragment);
+                break;
+            case R.id.action_map:
+                if(!getHarvestRecordArrayList().isEmpty()){
+                    MapFragment mapFragment = new MapFragment();
+                    Bundle bundle = new Bundle();
+                    bundle.putInt(MapFragment.ARG_PARAM_HARVEST_ID, getHarvestRecordArrayList().get(0).getId());
+                    mapFragment.setArguments(bundle);
+                    OnFragmentReplaced(mapFragment);
+                }
+
+
                 break;
         }
 

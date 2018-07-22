@@ -2,6 +2,7 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="MaterialDemo">
+        <item name="cardViewStyle">@style/CardView</item>
     </style>
 
     <style name="MaterialDemo"

@@ -1,6 +1,7 @@
 <resources>
 
   <style name="AppTheme" parent="MaterialDemo">
+	  <item name="cardViewStyle">@style/CardView</item>
 	<item
 	name="android:windowContentTransitions">true</item>
 	 <item

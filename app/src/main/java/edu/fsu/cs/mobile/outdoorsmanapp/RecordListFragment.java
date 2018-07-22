@@ -23,6 +23,8 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 
 
 /**
@@ -73,7 +75,19 @@ public class RecordListFragment extends Fragment {
         ArrayList<HarvestRecord> arrayList = ((MainActivity)getActivity()).getHarvestRecordArrayList();
 
         if(!arrayList.isEmpty()){
+
+            //TODO: Add sort when harvestIdis
+            /*
+            Collections.sort(arrayList, new Comparator<HarvestRecord>() {
+                @Override
+                public int compare(HarvestRecord lhs, HarvestRecord rhs) {
+                    // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
+                    return Long.compare(rhs.getDate(), lhs.getDate());
+                }
+            });
+            */
             mAdapter = new RecordListAdapter(getActivity(), arrayList);
+
             mRecyclerView.setAdapter(mAdapter);
             Log.i(TAG, "RecordListFragment.onViewCreated():setAdapter()");
             mRecyclerView.setItemAnimator(new DefaultItemAnimator());

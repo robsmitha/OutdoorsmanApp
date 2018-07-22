@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class RecordListAdapter extends RecyclerView.Adapter<RecordListAdapter.ViewHolder> {
 
@@ -41,7 +42,7 @@ public class RecordListAdapter extends RecyclerView.Adapter<RecordListAdapter.Vi
     @Override
     public RecordListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // create a new view
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.model, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.record_list_model, parent, false);
         // set the view's size, margins, paddings and layout parameters
 
         ViewHolder vh = new ViewHolder(v);
@@ -68,7 +69,8 @@ public class RecordListAdapter extends RecyclerView.Adapter<RecordListAdapter.Vi
         TextView textViewType = holder.itemView.findViewById(R.id.textViewType);
         textViewType.setText("Type: "+model.getType());
         TextView textViewDate = holder.itemView.findViewById(R.id.textViewDate);
-        textViewDate.setText("Date: "+model.getDate());
+
+        textViewDate.setText(""+model.getDateString());
         TextView textViewLocation = holder.itemView.findViewById(R.id.textViewLocation);
         textViewLocation.setText("Location: lat: "+model.getLatLng().latitude+ " lng: " + ""+model.getLatLng().longitude);
 
@@ -81,7 +83,6 @@ public class RecordListAdapter extends RecyclerView.Adapter<RecordListAdapter.Vi
     private Context getContext() {
         return mContext;
     }
-
 
     // Return the size of your dataset (invoked by the layout manager)
     @Override

@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -70,7 +72,25 @@ public class AccountFragment extends Fragment {
             }
         });
 
+        ImageButton imageButtonForm = (ImageButton) view.findViewById(R.id.imageButtonForm);
+        imageButtonForm.setOnClickListener( new View.OnClickListener() {
 
+            @Override
+            public void onClick(View v) {
+                FormFragment formFragment = new FormFragment();
+                ((MainActivity)getActivity()).OnFragmentReplaced(formFragment);
+            }
+        });
+
+        ImageButton imageButtonRecords = (ImageButton) view.findViewById(R.id.imageButtonRecords);
+        imageButtonRecords.setOnClickListener( new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                RecordListFragment recordListFragment = new RecordListFragment();
+                ((MainActivity)getActivity()).OnFragmentReplaced(recordListFragment);
+            }
+        });
         return view;
     }
     private ListView AddListViewAdapter(ListView mylistview, String[] strings){

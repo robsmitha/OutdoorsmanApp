@@ -9,6 +9,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CalendarView;
+import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -16,11 +19,13 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 /**
@@ -31,6 +36,8 @@ public class FormFragment extends Fragment {
     public static int harvestRecordCounter = 0;
     public final static int case_submit_again = 0;
     public final static int case_record_list = 1;
+    long date;
+    Calendar c;
 
     public FormFragment() {
         // Required empty public constructor
@@ -57,16 +64,100 @@ public class FormFragment extends Fragment {
 
     private void BindFormTypes(View view){
 
+        final CalendarView calendarViewCurrentDate = view.findViewById(R.id.calendarViewCurrentDate);
+
+        c  = Calendar.getInstance();
+
+        calendarViewCurrentDate.setMaxDate(c.getTimeInMillis());
+        
+        calendarViewCurrentDate.setDate(c.getTimeInMillis(),false,true);
+        calendarViewCurrentDate.setVisibility(View.INVISIBLE);
+        calendarViewCurrentDate.setEnabled(false);
+
+        final Switch switchCurrentDate = view.findViewById(R.id.switchRecordCurrentDate);
+        switchCurrentDate.setVisibility(View.VISIBLE);
+        switchCurrentDate.setChecked(true);
+
+        date = calendarViewCurrentDate.getDate();
+
+        calendarViewCurrentDate.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
+            @Override
+            public void onSelectedDayChange(CalendarView view, int year, int month,
+                                            int day) {
+                c = Calendar.getInstance();
+                c.clear();
+                month++;
+                c.set(year,  month, day, 11, 59);
+                date = c.getTimeInMillis();
+                switchCurrentDate.setText(month+"/"+day+"/"+year);
+            }
+
+        });
+
+
+        switchCurrentDate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                // do something, the isChecked will be
+                // true if the switch is in the On position
+                if(!isChecked){
+                    calendarViewCurrentDate.setDateTextAppearance(Calendar.getInstance().getFirstDayOfWeek());
+                    calendarViewCurrentDate.setEnabled(true);
+                    switchCurrentDate.setText("Enter the Date");
+                    calendarViewCurrentDate.setVisibility(View.VISIBLE);
+                }else{
+                    //we're going to grab the current time at the time of submission
+                    //calendarViewCurrentDate.setDate(System.currentTimeMillis());
+                    calendarViewCurrentDate.setEnabled(false);
+                    switchCurrentDate.setText("Record the Current Date");
+                    calendarViewCurrentDate.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+
+
         //TODO: determine if phone has location services on
         //TODO: apply "checked" logic / show TextViews if not checked
-        Switch switchCurrentLocation = view.findViewById(R.id.switchRecordLocation);
+        final EditText editTextLatitude = view.findViewById(R.id.editTextLatitude);
+        editTextLatitude.setVisibility(View.VISIBLE);
+        editTextLatitude.setText("-34");
+        editTextLatitude.setEnabled(false);
+
+        final EditText editTextLongitude = view.findViewById(R.id.editTextLongitude);
+        editTextLongitude.setVisibility(View.VISIBLE);
+        editTextLongitude.setText("151");
+        editTextLongitude.setEnabled(false);
+
+
+        final Switch switchCurrentLocation = view.findViewById(R.id.switchRecordLocation);
         switchCurrentLocation.setVisibility(View.VISIBLE);
         switchCurrentLocation.setChecked(true);
 
-        //TODO: apply "checked" logic / show calendar if not checked
-        Switch switchCurrentDate = view.findViewById(R.id.switchRecordCurrentDate);
-        switchCurrentDate.setVisibility(View.VISIBLE);
-        switchCurrentDate.setChecked(true);
+        switchCurrentLocation.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                // do something, the isChecked will be
+                // true if the switch is in the On position
+
+
+                //reset errors
+                editTextLatitude.setError(null);
+                editTextLongitude.setError(null);
+
+                if(!isChecked){
+                    editTextLatitude.setText(null); //clear fields
+                    editTextLongitude.setText(null);
+                    editTextLatitude.setEnabled(true);  //enable for input
+                    editTextLongitude.setEnabled(true);
+                    switchCurrentLocation.setText("Enter Location");    //update label
+                }else{
+
+                    editTextLatitude.setText("-34");    //set default values
+                    editTextLongitude.setText("151");
+                    editTextLatitude.setEnabled(false); //disable
+                    editTextLongitude.setEnabled(false);
+                    switchCurrentLocation.setText("Record Current Location");   //update label
+                }
+            }
+        });
 
         TextView textView = view.findViewById(R.id.textView4);
         textView.setText(R.string.title_form_fragment);
@@ -93,63 +184,102 @@ public class FormFragment extends Fragment {
     private void ConfirmFormType(String formType, int typeId){
 
         View view = getView();
+        boolean isValid = true;
 
         Switch switchCurrentDate = view.findViewById(R.id.switchRecordCurrentDate);
+        CalendarView calendarViewCurrentDate = view.findViewById(R.id.calendarViewCurrentDate);
+
+        long timeStamp = System.currentTimeMillis();//grab current time
+
+        if(!switchCurrentDate.isChecked()){
+            if(calendarViewCurrentDate.getDate() == 0){
+                isValid = false;
+            }
+            else {
+                timeStamp = date;  //set in calendarViewCurrentDate.setOnDateChangeListener()
+            }
+        }
+
         Switch switchCurrentLocation = view.findViewById(R.id.switchRecordLocation);
-        switchCurrentDate.setVisibility(View.INVISIBLE);
-        switchCurrentLocation.setVisibility(View.INVISIBLE);
+        EditText editTextLatitude = view.findViewById(R.id.editTextLatitude);
+        EditText editTextLongitude = view.findViewById(R.id.editTextLongitude);
+
+        double latitude = -34;
+        double longitude = 151;
+
+        if(!switchCurrentLocation.isChecked()){
+            if(editTextLatitude.getText().toString().isEmpty()){
+                editTextLatitude.setError("Please enter a date");
+                isValid = false;
+            }else{
+                latitude = Double.parseDouble(editTextLatitude.getText().toString());
+            }
+            if(editTextLongitude.getText().toString().isEmpty()){
+                editTextLongitude.setError("Please enter a date");
+                isValid = false;
+            }else{
+                longitude = Double.parseDouble(editTextLongitude.getText().toString());
+            }
+        }
 
         TextView textView = view.findViewById(R.id.textView4);
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
 
-        //Set UI message
-        textView.setText(formType + " Form Type submitted at: " + timeStamp);
-
-
-
-
-        //Add this record to the HarvestRecordArrayList in MainActivity
-        //TODO: add records to firebase, get location serivce, check if switches for date & calendar are "checked"
-        HarvestRecord harvestRecord = new HarvestRecord();
-        harvestRecord.setId(harvestRecordCounter++);    //TODO: use id from firebase
-        harvestRecord.setTypeId(typeId);
-        harvestRecord.setType(formType);
-        harvestRecord.setDate(timeStamp);
-        harvestRecord.setLatLng(new LatLng(-34, 151));
-        ((MainActivity)getActivity()).addHarvestRecordArrayListItem(harvestRecord);
+        if(isValid){
+            switchCurrentDate.setVisibility(View.INVISIBLE);
+            calendarViewCurrentDate.setVisibility(View.INVISIBLE);
+            switchCurrentLocation.setVisibility(View.INVISIBLE);
+            editTextLatitude.setVisibility(View.INVISIBLE);
+            editTextLongitude.setVisibility(View.INVISIBLE);
 
 
+            //Add this record to the HarvestRecordArrayList in MainActivity
+            //TODO: add records to firebase, get location serivce, check if switches for date & calendar are "checked"
+            HarvestRecord harvestRecord = new HarvestRecord();
+            harvestRecord.setId(harvestRecordCounter++);    //TODO: use id from firebase
+            harvestRecord.setTypeId(typeId);
+            harvestRecord.setType(formType);
+            harvestRecord.setDate(timeStamp);
+            harvestRecord.setLatLng(new LatLng(latitude, longitude));
+            ((MainActivity)getActivity()).addHarvestRecordArrayListItem(harvestRecord);
 
-        //rebind listview with "after submit options", what to do after submission
-        String[] form_types_after_submit_options = getResources().getStringArray(R.array.form_types_after_submit_options);
-        ListView mainListView = view.findViewById(R.id.mainListView);
-        mainListView = AddListViewAdapter(mainListView, form_types_after_submit_options);
-        mainListView.setClickable(true);
 
-        final ListView finalMainListView = mainListView;
-        mainListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            //Set UI message
+            textView.setText(formType + " Form Type submitted at: " + harvestRecord.getDateString());
 
-            @Override
-            public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
-                switch (position){
-                    case case_submit_again:
-                        //rebind
-                        BindFormTypes(getView());   //Submit Another
-                        break;
-                    case case_record_list:
-                        //go to list
-                        RecordListFragment recordListFragment = new RecordListFragment();
-                        ((MainActivity)getActivity()).OnFragmentReplaced(recordListFragment);
-                        break;
-                    default:
-                        //go home
-                        AccountFragment accountFragment = new AccountFragment();
-                        ((MainActivity)getActivity()).OnFragmentReplaced(accountFragment);
-                        break;
+
+            //rebind listview with "after submit options", what to do after submission
+            String[] form_types_after_submit_options = getResources().getStringArray(R.array.form_types_after_submit_options);
+            ListView mainListView = view.findViewById(R.id.mainListView);
+            mainListView = AddListViewAdapter(mainListView, form_types_after_submit_options);
+            mainListView.setClickable(true);
+
+            final ListView finalMainListView = mainListView;
+            mainListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+                @Override
+                public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+                    switch (position){
+                        case case_submit_again:
+                            //rebind
+                            BindFormTypes(getView());   //Submit Another
+                            break;
+                        case case_record_list:
+                            //go to list
+                            RecordListFragment recordListFragment = new RecordListFragment();
+                            ((MainActivity)getActivity()).OnFragmentReplaced(recordListFragment);
+                            break;
+                        default:
+                            //go home
+                            AccountFragment accountFragment = new AccountFragment();
+                            ((MainActivity)getActivity()).OnFragmentReplaced(accountFragment);
+                            break;
+                    }
                 }
-            }
-        });
+            });
 
+        }else {
+            textView.setText("Please fill out all fields");
+        }
     }
 
     private ListView AddListViewAdapter(ListView mylistview, String[] strings){

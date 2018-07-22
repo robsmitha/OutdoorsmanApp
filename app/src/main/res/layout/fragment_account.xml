@@ -3,26 +3,69 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     tools:context=".AccountFragment">
+
+    <TextView
+        android:id="@+id/textViewForm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="55dp"
+        android:layout_marginTop="91dp"
+        android:text="New Form" />
+
+    <ImageButton
+        android:id="@+id/imageButtonForm"
+        android:layout_width="125dp"
+        android:layout_height="125dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="26dp"
+        android:layout_marginTop="135dp"
+        android:background="#ffffff"
+        android:src="@drawable/ic_add_circle_outline_black_24dp" />
+
+    <TextView
+        android:id="@+id/textViewRecords"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@+id/textViewForm"
+        android:layout_marginEnd="48dp"
+        android:text="Form Records" />
+
+    <ImageButton
+        android:id="@+id/imageButtonRecords"
+        android:layout_width="125dp"
+        android:layout_height="125dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@+id/imageButtonForm"
+        android:layout_marginEnd="25dp"
+        android:background="#ffffff"
+        android:src="@drawable/ic_folder_open_black_24dp" />
 
 
     <TextView
         android:id="@+id/textViewAccount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="85dp"
+        android:layout_marginBottom="237dp"
         android:text="My Badges" />
 
     <ListView
         android:id="@+id/mainListView"
         android:layout_width="match_parent"
         android:layout_height="200dp"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="115dp">
+        android:layout_marginBottom="21dp">
 
     </ListView>
+
+
 
 </RelativeLayout>

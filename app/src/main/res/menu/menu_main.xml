@@ -3,17 +3,26 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_home"
-        android:title="Home"
+        android:title="My Account"
+        android:icon="@drawable/ic_person_black_24dp"
         android:orderInCategory="100"
-        app:showAsAction="never" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/action_form"
-        android:title="Form"
+        android:title="New Form"
+        android:icon="@drawable/ic_add_circle_outline_black_24dp"
         android:orderInCategory="100"
-        app:showAsAction="never" />
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_map"
+        android:title="Map"
+        android:icon="@drawable/ic_location_on_black_24dp"
+        android:orderInCategory="100"
+        app:showAsAction="always" />
     <item
         android:id="@+id/action_record_list"
-        android:title="Records"
+        android:title="Form Records"
+        android:icon="@drawable/ic_folder_open_black_24dp"
         android:orderInCategory="100"
-        app:showAsAction="never" />
+        app:showAsAction="always" />
 </menu>
