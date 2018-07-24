@@ -1,9 +1,10 @@
 package edu.fsu.cs.mobile.outdoorsmanapp;
 
 import android.content.Context;
-import android.net.Uri;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,7 +14,14 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CalendarView;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -24,18 +32,18 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Objects;
 
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MapFragment extends Fragment implements GoogleMap.OnMarkerClickListener {
+public class MapFragment extends Fragment {
 
     private RecyclerView mRecyclerView;
     private RecordListAdapter mAdapter;
@@ -96,8 +104,47 @@ public class MapFragment extends Fragment implements GoogleMap.OnMarkerClickList
                             .position(location)
                             .title(title)
                             .snippet(snippet));
+
+                    mMarker.setTag(item);
+
+
+
                     hashMapMarker.put(item,mMarker);
                 }
+
+                googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                    @Override
+                    public boolean  onMarkerClick(Marker marker) {
+
+                        HarvestRecord harvestRecord = (HarvestRecord)marker.getTag();
+                        mParamHarvestId = harvestRecord.getId();
+
+                        CameraPosition cameraPosition = new CameraPosition.Builder().target(harvestRecord.getLatLng()).zoom(ZOOM_LEVEL_5).build();
+                        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+                        BindRecyclerView(getView());
+                        return false;
+                    }
+                });
+
+
+                googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                    @Override
+                    public void onInfoWindowClick(Marker marker) {
+
+                        Log.d("TAG","onInfoWindowClick");
+                        showHarvestSubmissionDialog();
+                        position = marker.getPosition();
+                    }
+                });
+                googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+
+                    @Override
+                    public void onMapClick(LatLng point) {
+
+
+                    }
+                });
 
                 //this gets one unique HarvestRecord
                 HarvestRecord harvestRecord = harvestRecordEntries.get(mParamHarvestId);    //NOTE: HarvestId matches position in ArrayList for debugging purposes
@@ -115,7 +162,7 @@ public class MapFragment extends Fragment implements GoogleMap.OnMarkerClickList
             }
         });
 
-       // googleMap.setOnMarkerClickListener(this);
+
 
         BindRecyclerView(rootView);
 
@@ -241,8 +288,6 @@ public class MapFragment extends Fragment implements GoogleMap.OnMarkerClickList
             Marker marker = hashMapMarker.get(harvestRecord);
             marker.showInfoWindow();;
             return true;
-
-
         }
 
     }
@@ -269,10 +314,153 @@ public class MapFragment extends Fragment implements GoogleMap.OnMarkerClickList
         super.onLowMemory();
         mMapView.onLowMemory();
     }
-    @Override
-    public boolean onMarkerClick(final Marker marker) {
+
+    private Calendar c;
+    private int harvestRecordCounter;
+    private int formTypeId;
+    private String formType;
+    private long harvestDate;
+    private LatLng position;
+
+    private void showHarvestSubmissionDialog(){
+        Context context = getContext();
 
 
-        return true;
+        final AlertDialog alertDialog = new AlertDialog.Builder(context).create();
+        alertDialog.setTitle("Submit New Harvest");
+
+        LinearLayout layout = new LinearLayout(context);
+        layout.setOrientation(LinearLayout.VERTICAL);
+
+        final TextView textView = new TextView(getContext());
+        final Button button = new Button(getContext());
+        button.setText("Confirm");
+
+
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+                harvestRecordCounter = ((MainActivity)getActivity()).getHarvestRecordArrayList().size();
+
+                HarvestRecord harvestRecord = new HarvestRecord();
+                harvestRecord.setId(++harvestRecordCounter);    //TODO: use id from firebase
+                harvestRecord.setTypeId(formTypeId);
+                harvestRecord.setType(formType);
+                harvestRecord.setDate(harvestDate);
+                harvestRecord.setLatLng(position);
+                ((MainActivity)getActivity()).addHarvestRecordArrayListItem(harvestRecord);
+
+                textView.setText(formType+" Submitted");
+                textView.setVisibility(View.VISIBLE);
+
+
+                LatLng location = harvestRecord.getLatLng();
+                String title = "Type: " + harvestRecord.getType();
+                String snippet = "Date: " + harvestRecord.getDateString();
+
+                mMarker = googleMap.addMarker(new MarkerOptions()
+                        .position(location)
+                        .title(title)
+                        .snippet(snippet));
+
+                mMarker.setTag(harvestRecord);
+
+
+
+                hashMapMarker.put(harvestRecord,mMarker);
+            }
+        });
+
+        ListView listView = new ListView(getContext());
+
+        String[] form_types = getResources().getStringArray(R.array.form_types);
+        listView = AddListViewAdapter(listView, form_types);
+
+        listView.setClickable(true);
+        final ListView finalListView = listView;
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+                Object listItemObj = finalListView.getItemAtPosition(position);
+                String type = (String)listItemObj;
+                formTypeId = position;
+                formType = type;
+                finalListView.setVisibility(View.INVISIBLE);
+
+
+                textView.setText("Please confirm "+formType+" form.");
+                textView.setVisibility(View.VISIBLE);
+                button.setVisibility(View.VISIBLE);
+
+                //ConfirmFormType(formType,position); //NOTE: passing the position int as the typeId, see ~/res/values/R.arrays.form_types
+                //TODO: Back up with data, set up web api or leave as it (hardcoded in strings.xml
+
+            }
+        });
+
+        button.setVisibility(View.GONE);
+        textView.setVisibility(View.GONE);
+        listView.setVisibility(View.GONE);
+
+
+
+        final CalendarView calendarView = new CalendarView(getContext());
+        c = Calendar.getInstance();
+
+        calendarView.setMaxDate(c.getTimeInMillis());
+        calendarView.setDate(c.getTimeInMillis(),false,true);
+        calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
+            @Override
+            public void onSelectedDayChange(CalendarView view, int year, int month,
+                                            int day) {
+                c = Calendar.getInstance();
+                c.clear();
+                month++;
+                c.set(year,  month, day, 11, 59);
+                harvestDate = c.getTimeInMillis();
+                calendarView.setVisibility(View.GONE);
+                finalListView.setVisibility(View.VISIBLE);
+            }
+
+        });
+
+
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+
+        textView.setLayoutParams(lp);
+        calendarView.setLayoutParams(lp);
+        layout.setLayoutParams(lp);
+
+        layout.addView(textView);
+        layout.addView(calendarView);
+        layout.addView(listView);
+        layout.addView(button);
+
+
+        alertDialog.setView(layout);
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "CLOSE",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+        alertDialog.show();
+    }
+    private ListView AddListViewAdapter(ListView mylistview, String[] strings){
+        //create ArrayList to bind adapater
+        ArrayList<String> adapterList = new ArrayList<>(Arrays.asList(strings));
+
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>
+                (Objects.requireNonNull(getContext()), android.R.layout.simple_list_item_1, adapterList);
+        //set adapter
+        mylistview.setAdapter(arrayAdapter);
+
+        return mylistview;
     }
 }
