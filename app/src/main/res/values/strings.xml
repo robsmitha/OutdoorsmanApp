@@ -5,6 +5,13 @@
     <string name="title_activity_maps">Map</string>
     <string name="record_current_date">Record Current Date</string>
     <string name="record_current_location">Record Current Location</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="welcome">Welcome to the OutdoorsmanApp!</string>
+    <string name="signInToContinue">Please Sign In to Continue</string>
+    <string name="signIn">Sign In</string>
+    <string name="ok">Okay</string>
+    <string name="locPermBody">This app needs to access the device\'s location to track your harvest locations. Do you want to give permission?</string>
+    <string name="locPermTitle">Location Access Required</string>
 
     <string-array name="form_types">
         <item>Fish</item>
@@ -17,7 +24,4 @@
         <item>Go to Record List</item>
         <item>Return Home</item>
     </string-array>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
