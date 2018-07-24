@@ -3,6 +3,7 @@ package edu.fsu.cs.mobile.outdoorsmanapp;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +18,15 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,16 +36,25 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class FormFragment extends Fragment {
+    MapView mMapView;
+    Marker mMarker;
+    private GoogleMap googleMap;
+    private final static int ZOOM_LEVEL_5 = 5;
+    private final static int ZOOM_LEVEL_11 = 11;
 
     public static int harvestRecordCounter = 0;
     public final static int case_submit_again = 0;
     public final static int case_record_list = 1;
-    long date;
+
+    double latitude;
+    double longitude;
+    long harvestDate;
     Calendar c;
 
     public FormFragment() {
@@ -55,6 +73,9 @@ public class FormFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view =  inflater.inflate(R.layout.fragment_form, container, false);
+        mMapView = (MapView) view.findViewById(R.id.mapView);
+
+        mMapView.onCreate(savedInstanceState);
 
         BindFormTypes(view);
 
@@ -78,7 +99,7 @@ public class FormFragment extends Fragment {
         switchCurrentDate.setVisibility(View.VISIBLE);
         switchCurrentDate.setChecked(true);
 
-        date = calendarViewCurrentDate.getDate();
+        harvestDate = calendarViewCurrentDate.getDate();
 
         calendarViewCurrentDate.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             @Override
@@ -88,7 +109,7 @@ public class FormFragment extends Fragment {
                 c.clear();
                 month++;
                 c.set(year,  month, day, 11, 59);
-                date = c.getTimeInMillis();
+                harvestDate = c.getTimeInMillis();
                 switchCurrentDate.setText(month+"/"+day+"/"+year);
             }
 
@@ -117,16 +138,9 @@ public class FormFragment extends Fragment {
 
         //TODO: determine if phone has location services on
         //TODO: apply "checked" logic / show TextViews if not checked
-        final EditText editTextLatitude = view.findViewById(R.id.editTextLatitude);
-        editTextLatitude.setVisibility(View.VISIBLE);
-        editTextLatitude.setText("-34");
-        editTextLatitude.setEnabled(false);
 
-        final EditText editTextLongitude = view.findViewById(R.id.editTextLongitude);
-        editTextLongitude.setVisibility(View.VISIBLE);
-        editTextLongitude.setText("151");
-        editTextLongitude.setEnabled(false);
-
+        latitude = -34;
+        longitude = 151;
 
         final Switch switchCurrentLocation = view.findViewById(R.id.switchRecordLocation);
         switchCurrentLocation.setVisibility(View.VISIBLE);
@@ -136,28 +150,64 @@ public class FormFragment extends Fragment {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 // do something, the isChecked will be
                 // true if the switch is in the On position
-
-
-                //reset errors
-                editTextLatitude.setError(null);
-                editTextLongitude.setError(null);
-
                 if(!isChecked){
-                    editTextLatitude.setText(null); //clear fields
-                    editTextLongitude.setText(null);
-                    editTextLatitude.setEnabled(true);  //enable for input
-                    editTextLongitude.setEnabled(true);
-                    switchCurrentLocation.setText("Enter Location");    //update label
+                    latitude = 0;
+                    longitude = 0;
+                    mMapView.setVisibility(View.VISIBLE);
+                    switchCurrentLocation.setText("Pick Location");    //update label
                 }else{
-
-                    editTextLatitude.setText("-34");    //set default values
-                    editTextLongitude.setText("151");
-                    editTextLatitude.setEnabled(false); //disable
-                    editTextLongitude.setEnabled(false);
+                    latitude = -34;
+                    longitude = 151;
+                    mMapView.setVisibility(View.GONE);
                     switchCurrentLocation.setText("Record Current Location");   //update label
                 }
             }
         });
+
+        mMapView.onResume(); // needed to get the map to display immediately
+
+        try {
+            MapsInitializer.initialize(getActivity().getApplicationContext());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        mMapView.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap mMap) {
+                googleMap = mMap;
+
+
+                googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                    @Override
+                    public void onMapClick(LatLng point) {
+
+                        if(mMarker != null){
+                            mMarker.remove();
+                        }
+
+                        latitude = point.latitude;
+                        longitude = point.longitude;
+                        switchCurrentLocation.setText("Latitude: "+latitude + " Longitude: "+longitude);
+
+                        String title = "Latitude: " + latitude;
+                        String snippet = "Longitude: " + longitude;
+
+                        mMarker = googleMap.addMarker(new MarkerOptions()
+                                .position(point)
+                                .title(title)
+                                .snippet(snippet));
+                    }
+                });
+
+                CameraPosition cameraPosition = new CameraPosition.Builder().target(new LatLng(-34,151)).zoom(ZOOM_LEVEL_5).build();
+                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                googleMap.getUiSettings().setZoomControlsEnabled(true);
+            }
+        });
+        mMapView.setVisibility(View.GONE);
+
+
 
         TextView textView = view.findViewById(R.id.textView4);
         textView.setText(R.string.title_form_fragment);
@@ -177,6 +227,7 @@ public class FormFragment extends Fragment {
                 String formType = (String)listItemObj;
                 ConfirmFormType(formType,position); //NOTE: passing the position int as the typeId, see ~/res/values/R.arrays.form_types
                 //TODO: Back up with data, set up web api or leave as it (hardcoded in strings.xml
+
             }
         });
     }
@@ -193,33 +244,19 @@ public class FormFragment extends Fragment {
 
         if(!switchCurrentDate.isChecked()){
             if(calendarViewCurrentDate.getDate() == 0){
+                switchCurrentDate.setText("Choose Date");
                 isValid = false;
             }
             else {
-                timeStamp = date;  //set in calendarViewCurrentDate.setOnDateChangeListener()
+                timeStamp = harvestDate;  //set in calendarViewCurrentDate.setOnDateChangeListener()
             }
         }
 
         Switch switchCurrentLocation = view.findViewById(R.id.switchRecordLocation);
-        EditText editTextLatitude = view.findViewById(R.id.editTextLatitude);
-        EditText editTextLongitude = view.findViewById(R.id.editTextLongitude);
 
-        double latitude = -34;
-        double longitude = 151;
-
-        if(!switchCurrentLocation.isChecked()){
-            if(editTextLatitude.getText().toString().isEmpty()){
-                editTextLatitude.setError("Please enter a date");
-                isValid = false;
-            }else{
-                latitude = Double.parseDouble(editTextLatitude.getText().toString());
-            }
-            if(editTextLongitude.getText().toString().isEmpty()){
-                editTextLongitude.setError("Please enter a date");
-                isValid = false;
-            }else{
-                longitude = Double.parseDouble(editTextLongitude.getText().toString());
-            }
+        if(longitude == 0 && latitude == 0){
+            switchCurrentLocation.setText("Choose Location");
+            isValid = false;
         }
 
         TextView textView = view.findViewById(R.id.textView4);
@@ -228,8 +265,11 @@ public class FormFragment extends Fragment {
             switchCurrentDate.setVisibility(View.INVISIBLE);
             calendarViewCurrentDate.setVisibility(View.INVISIBLE);
             switchCurrentLocation.setVisibility(View.INVISIBLE);
-            editTextLatitude.setVisibility(View.INVISIBLE);
-            editTextLongitude.setVisibility(View.INVISIBLE);
+
+            if(mMarker != null){
+                mMarker.remove();
+            }
+            mMapView.setVisibility(View.GONE);
 
 
             //Add this record to the HarvestRecordArrayList in MainActivity
@@ -261,7 +301,7 @@ public class FormFragment extends Fragment {
                     switch (position){
                         case case_submit_again:
                             //rebind
-                            BindFormTypes(getView());   //Submit Another
+                            BindFormTypes(Objects.requireNonNull(getView()));   //Submit Another
                             break;
                         case case_record_list:
                             //go to list
@@ -284,11 +324,10 @@ public class FormFragment extends Fragment {
 
     private ListView AddListViewAdapter(ListView mylistview, String[] strings){
         //create ArrayList to bind adapater
-        ArrayList<String> adapterList = new ArrayList<>();
-        adapterList.addAll(Arrays.asList(strings));
+        ArrayList<String> adapterList = new ArrayList<>(Arrays.asList(strings));
 
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>
-                (getContext(), android.R.layout.simple_list_item_1, adapterList);
+                (Objects.requireNonNull(getContext()), android.R.layout.simple_list_item_1, adapterList);
         //set adapter
         mylistview.setAdapter(arrayAdapter);
 
