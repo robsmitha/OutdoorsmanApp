@@ -1,6 +1,7 @@
 package edu.fsu.cs.mobile.outdoorsmanapp;
 
 
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -57,6 +58,9 @@ public class FormFragment extends Fragment {
     long harvestDate;
     Calendar c;
 
+    private boolean lastLocationAvailable;
+    private Location mainActivityLocation;
+
     public FormFragment() {
         // Required empty public constructor
     }
@@ -71,6 +75,7 @@ public class FormFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         // Inflate the layout for this fragment
         View view =  inflater.inflate(R.layout.fragment_form, container, false);
         mMapView = (MapView) view.findViewById(R.id.mapView);
@@ -80,6 +85,15 @@ public class FormFragment extends Fragment {
         BindFormTypes(view);
 
         return view;
+
+    }
+
+    private void getLastLocation(){
+
+        lastLocationAvailable = ((MainActivity) getActivity()).isLastLocationAvailable();
+        mainActivityLocation = ((MainActivity) getActivity()).getCurrentLocation();
+        latitude = mainActivityLocation.getLatitude();
+        longitude = mainActivityLocation.getLongitude();
 
     }
 
@@ -139,8 +153,7 @@ public class FormFragment extends Fragment {
         //TODO: determine if phone has location services on
         //TODO: apply "checked" logic / show TextViews if not checked
 
-        latitude = -34;
-        longitude = 151;
+        getLastLocation();
 
         final Switch switchCurrentLocation = view.findViewById(R.id.switchRecordLocation);
         switchCurrentLocation.setVisibility(View.VISIBLE);
@@ -148,6 +161,8 @@ public class FormFragment extends Fragment {
 
         switchCurrentLocation.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                ((MainActivity) getActivity()).getLastLocation();
+
                 // do something, the isChecked will be
                 // true if the switch is in the On position
                 if(!isChecked){
@@ -156,8 +171,7 @@ public class FormFragment extends Fragment {
                     mMapView.setVisibility(View.VISIBLE);
                     switchCurrentLocation.setText("Pick Location");    //update label
                 }else{
-                    latitude = -34;
-                    longitude = 151;
+                    getLastLocation();
                     mMapView.setVisibility(View.GONE);
                     switchCurrentLocation.setText("Record Current Location");   //update label
                 }
@@ -200,7 +214,9 @@ public class FormFragment extends Fragment {
                     }
                 });
 
-                CameraPosition cameraPosition = new CameraPosition.Builder().target(new LatLng(-34,151)).zoom(ZOOM_LEVEL_5).build();
+                CameraPosition cameraPosition = new CameraPosition.Builder()
+                        .target(new LatLng(mainActivityLocation.getLatitude(),mainActivityLocation.getLongitude()))
+                        .zoom(ZOOM_LEVEL_5).build();
                 googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
                 googleMap.getUiSettings().setZoomControlsEnabled(true);
             }
@@ -274,14 +290,14 @@ public class FormFragment extends Fragment {
 
             //Add this record to the HarvestRecordArrayList in MainActivity
             //TODO: add records to firebase, get location serivce, check if switches for date & calendar are "checked"
-            HarvestRecord harvestRecord = new HarvestRecord();
+            HarvestRecord harvestRecord = new HarvestRecord(((MainActivity)getActivity()).getCurrentUser());
             harvestRecord.setId(harvestRecordCounter++);    //TODO: use id from firebase
             harvestRecord.setTypeId(typeId);
             harvestRecord.setType(formType);
             harvestRecord.setDate(timeStamp);
             harvestRecord.setLatLng(new LatLng(latitude, longitude));
-            ((MainActivity)getActivity()).addHarvestRecordArrayListItem(harvestRecord);
 
+            ((MainActivity)getActivity()).updateRecord(harvestRecord);
 
             //Set UI message
             textView.setText(formType + " Form Type submitted at: " + harvestRecord.getDateString());

@@ -22,7 +22,7 @@ public class HarvestRecord {
     private static final String LNG = "lng";
     private static final String ID = "id";
 
-    int id;
+    private int id;
     private int typeId;
     private long date;
     private double lat;
@@ -78,6 +78,7 @@ public class HarvestRecord {
 
     public Map<String, Object> toMap() {
         HashMap<String, Object> result = new HashMap<>();
+        result.put(ID, id);
         result.put(TYPE_ID, typeId);
         result.put(TYPE, type);
         result.put(USER_NAME, userName);

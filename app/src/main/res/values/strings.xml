@@ -12,6 +12,9 @@
     <string name="ok">Okay</string>
     <string name="locPermBody">This app needs to access the device\'s location to track your harvest locations. Do you want to give permission?</string>
     <string name="locPermTitle">Location Access Required</string>
+    <string name="gps_network_not_enabled">Location Services not enabled</string>
+    <string name="open_location_settings">Open Location Settings</string>
+    <string name="cancel">Cancel</string>
 
     <string-array name="form_types">
         <item>Fish</item>

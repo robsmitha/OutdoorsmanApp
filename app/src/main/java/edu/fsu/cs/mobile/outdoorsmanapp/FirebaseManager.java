@@ -31,6 +31,8 @@ public class FirebaseManager {
     private static String RECORDS_TABLE  = "Records";
     private static String LOBBY = "lobby";
 
+
+
     private MainActivity mActivity;
     private boolean firebaseSignedIn;
     private FirebaseUser mUser;
@@ -196,6 +198,8 @@ public class FirebaseManager {
 
     public void addToDatabase(HarvestRecord hr){
         String key = mDatabase.child(RECORDS_TABLE).push().getKey();
+        //TODO figure out id scenario. Firebase generated key/ID is not int, but MapFragment dependent on int id
+        //hr.setId(key);
 
         Map<String, Object> postValues = hr.toMap();
         Map<String, Object> childUpdates = new HashMap<>();
@@ -222,6 +226,56 @@ public class FirebaseManager {
         //mTable = mDatabase.child(MAIN_TABLE).child(mSessionName);
 
         //mTable.setValue(loc);
+
+    }
+
+    public void updateRecords(HarvestRecord hr){
+
+        addToDatabase(hr);
+
+        final int typeId = hr.getTypeId();
+
+        final String key = UserRecord.getKeyFromEmail(getCurrentUserEmail());
+
+        mDatabase.child(USER_TABLE).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if (snapshot.hasChild(key)) {
+                    Log.i(TAG, "User with key: "+key+" exists. Updating...");
+
+                    UserRecord tempUserRecord = UserRecord.fromDataSnapshot(snapshot.child(key));
+
+                    switch(typeId){
+                        //is fish
+                        case 0: tempUserRecord.setNumFish(tempUserRecord.getNumFish()+1);
+                                break;
+                        //is fowl
+                        case 1: tempUserRecord.setNumFowl(tempUserRecord.getNumFowl()+1);
+                                break;
+                        //is deer
+                        case 2: tempUserRecord.setNumDeer(tempUserRecord.getNumDeer()+1);
+                                break;
+                        //unknown
+                        default:Log.i(TAG, "Unknown typeId");
+
+                    }
+
+                    addToDatabase(tempUserRecord);
+
+                }else{
+
+                    Log.i(TAG, "User with key: "+key+" does not exist. Could not update record");
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.w(TAG, "Failed to read value.", error.toException());
+            }
+
+        });
 
     }
 }

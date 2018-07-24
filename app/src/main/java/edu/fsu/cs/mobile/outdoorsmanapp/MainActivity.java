@@ -2,12 +2,14 @@ package edu.fsu.cs.mobile.outdoorsmanapp;
 
 
 import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -30,12 +32,14 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     public static final int RC_SIGN_IN = 1234;
+    public static final int RC_LOCATION_ON = 3345;
     private static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
 
     private static final String TAG = MainActivity.class.getCanonicalName()+"ErrorChecking";
@@ -43,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseManager mFirebase;
     private Location currentLocation;
     private UserRecord myUserRecord;
+    private boolean lastLocationAvailable;
 
     private Toolbar mToolbar;
     private ArrayList<HarvestRecord> HarvestRecordArrayList;
@@ -67,6 +72,8 @@ public class MainActivity extends AppCompatActivity {
 
         currentLocation = (new Location(LocationManager.GPS_PROVIDER));
 
+        lastLocationAvailable = false;
+
         checkLocationPermission();
 
     }
@@ -86,12 +93,32 @@ public class MainActivity extends AppCompatActivity {
     }
     //END Temporary ArrayList methods for testing
 
-    public void OnFragmentReplaced(Fragment fragment){
+    private void internalOnFragmentChanged(Fragment fragment){
+
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.frame,fragment);
         fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
+
+    }
+
+    public void OnFragmentReplaced(Fragment fragment){
+
+        if(fragment != null){
+
+            if (fragment instanceof FormFragment){
+
+                getLastLocationFormFrag();
+
+            }else{
+
+                internalOnFragmentChanged(fragment);
+
+            }
+
+        }
+
     }
 
     public boolean checkLocationPermission() {
@@ -140,12 +167,54 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void getLastLocation(){
+    public void checkLocationEnabled(){
+
+        LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        boolean gps_enabled = false;
+        boolean network_enabled = false;
+
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch(Exception ex) {}
+
+        try {
+            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        } catch(Exception ex) {}
+
+        if(!gps_enabled && !network_enabled) {
+            // notify user
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            dialog.setMessage(getResources().getString(R.string.gps_network_not_enabled));
+            dialog.setPositiveButton(getResources().getString(R.string.open_location_settings), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    Intent myIntent = new Intent( Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    startActivityForResult(myIntent, RC_LOCATION_ON);
+                    //get gps
+                }
+            });
+            dialog.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    Toast.makeText(MainActivity.this, "Location Services Disabled", Toast.LENGTH_LONG).show();
+                    Log.i(TAG, "User hit cancel: location services still disabled");
+                }
+            });
+            dialog.show();
+        }
+
+    }
+
+    public void getLastLocationFormFrag(){
+
+        lastLocationAvailable = false;
 
         checkLocationPermission();
 
-        FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        checkLocationEnabled();
 
+        FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         try{
 
@@ -158,7 +227,17 @@ public class MainActivity extends AppCompatActivity {
                                 // GPS location can be null if GPS is switched off
                                 if (location != null) {
                                     //getAddress(location);
+                                    Log.i(TAG, "Location returned non null: "+location.toString());
+                                    lastLocationAvailable = true;
                                     currentLocation = location;
+                                    internalOnFragmentChanged(new FormFragment());
+                                }else{
+                                    Log.i(TAG, "location returned null");
+                                    lastLocationAvailable = false;
+                                    currentLocation = (new Location(LocationManager.GPS_PROVIDER));
+                                    currentLocation.reset();
+                                    internalOnFragmentChanged(new FormFragment());
+
                                 }
                             }
                         })
@@ -167,18 +246,110 @@ public class MainActivity extends AppCompatActivity {
                             public void onFailure(@NonNull Exception e) {
                                 Log.d(TAG, "Error trying to get last GPS location");
                                 e.printStackTrace();
+
+                                lastLocationAvailable = false;
+                                currentLocation = (new Location(LocationManager.GPS_PROVIDER));
+                                currentLocation.reset();
+
+                                internalOnFragmentChanged(new FormFragment());
                             }
                         });
 
             }else{
 
                 Log.e(TAG, "Location Permission not granted");
+                lastLocationAvailable = false;
+                currentLocation = (new Location(LocationManager.GPS_PROVIDER));
+                currentLocation.reset();
+                internalOnFragmentChanged(new FormFragment());
 
             }
 
         }catch(SecurityException s){
 
             Log.e(TAG, "Security Exception: Permission probably not found");
+            lastLocationAvailable = false;
+            currentLocation = (new Location(LocationManager.GPS_PROVIDER));
+            currentLocation.reset();
+
+            internalOnFragmentChanged(new FormFragment());
+        }
+
+    }
+
+    public void getLastLocation(){
+
+        lastLocationAvailable = false;
+
+        checkLocationPermission();
+
+        checkLocationEnabled();
+
+        FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        try{
+
+            if(isLocPermissionGranted()){
+
+                mFusedLocationClient.getLastLocation()
+                        .addOnSuccessListener(new OnSuccessListener<Location>() {
+                            @Override
+                            public void onSuccess(Location location) {
+                                // GPS location can be null if GPS is switched off
+                                if (location != null) {
+                                    //getAddress(location);
+                                    Log.i(TAG, "Location returned non null: "+location.toString());
+                                    lastLocationAvailable = true;
+                                    currentLocation = location;
+
+                                }else{
+                                    Log.i(TAG, "location returned null");
+                                    lastLocationAvailable = false;
+                                    currentLocation = (new Location(LocationManager.GPS_PROVIDER));
+                                    currentLocation.reset();
+
+                                }
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.d(TAG, "Error trying to get last GPS location");
+                                e.printStackTrace();
+
+                                lastLocationAvailable = false;
+                                currentLocation = (new Location(LocationManager.GPS_PROVIDER));
+                                currentLocation.reset();
+
+                            }
+                        });
+
+            }else{
+
+                Log.e(TAG, "Location Permission not granted");
+                lastLocationAvailable = false;
+                currentLocation = (new Location(LocationManager.GPS_PROVIDER));
+                currentLocation.reset();
+
+            }
+
+        }catch(SecurityException s){
+
+            Log.e(TAG, "Security Exception: Permission probably not found");
+            lastLocationAvailable = false;
+            currentLocation = (new Location(LocationManager.GPS_PROVIDER));
+            currentLocation.reset();
+
+        }
+
+    }
+
+    public void updateRecord(HarvestRecord hr){
+
+        addHarvestRecordArrayListItem(hr);
+        if (mFirebase != null){
+
+            mFirebase.updateRecords(hr);
 
         }
 
@@ -201,6 +372,18 @@ public class MainActivity extends AppCompatActivity {
 
     public void setMyUserRecord(UserRecord userRecord){
         myUserRecord = userRecord;
+    }
+
+    public boolean isLastLocationAvailable() {
+        return lastLocationAvailable;
+    }
+
+    public Location getCurrentLocation() {
+        return currentLocation;
+    }
+
+    public FirebaseUser getCurrentUser() {
+        return mFirebase.getCurrentUser();
     }
 
     @Override
@@ -246,6 +429,7 @@ public class MainActivity extends AppCompatActivity {
 
         //firebase tests
         //send result to FirebaseManager
+
         if(mFirebase != null){
 
             if (mFirebase.handleActivityResult(requestCode, resultCode, data)){
