@@ -40,12 +40,18 @@ public class RecordListFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private RecordListAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    private ArrayList<HarvestRecord> myHarvestRecords;
 
 
     public RecordListFragment() {
         // Required empty public constructor
     }
 
+    private void populateHarvestRecords(){
+
+
+
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

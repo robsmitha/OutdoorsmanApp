@@ -196,6 +196,37 @@ public class FirebaseManager {
 
     }
 
+    public void getCurrentUserHarvestRecords(){
+
+        final String key = UserRecord.getKeyFromEmail(getCurrentUserEmail());
+
+        mDatabase.child(RECORDS_TABLE).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                for(DataSnapshot hRSnapshot : snapshot.getChildren()) {
+                    String key = hRSnapshot.getKey();
+                    HarvestRecord newHR = HarvestRecord.fromDataSnapshot(hRSnapshot);
+
+                    if (newHR.getKeyFromEmail().equals(HarvestRecord.getKeyFromEmail(getCurrentUserEmail()))){
+                        //records belong to this user
+                        mActivity.addHarvestRecordArrayListItem(newHR);
+
+                    }
+
+                }
+                mActivity.onFinishPopulateHR();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.w(TAG, "Failed to read value.", error.toException());
+            }
+
+        });
+
+    }
+
     public void addToDatabase(HarvestRecord hr){
         String key = mDatabase.child(RECORDS_TABLE).push().getKey();
         //TODO figure out id scenario. Firebase generated key/ID is not int, but MapFragment dependent on int id

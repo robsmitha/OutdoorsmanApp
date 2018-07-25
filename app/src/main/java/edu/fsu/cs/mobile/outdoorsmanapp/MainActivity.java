@@ -77,6 +77,21 @@ public class MainActivity extends AppCompatActivity {
         checkLocationPermission();
 
     }
+
+    private void startPopulateHR(){
+
+        HarvestRecordArrayList = null;
+
+        mFirebase.getCurrentUserHarvestRecords();
+
+    }
+
+    public void onFinishPopulateHR(){
+
+        internalOnFragmentChanged(new RecordListFragment());
+
+    }
+
     //Temporary ArrayList methods for testing
     public ArrayList<HarvestRecord> getHarvestRecordArrayList() {
         if(HarvestRecordArrayList == null){
@@ -110,6 +125,10 @@ public class MainActivity extends AppCompatActivity {
             if (fragment instanceof FormFragment){
 
                 getLastLocationFormFrag();
+
+            }else if (fragment instanceof RecordListFragment){
+
+                startPopulateHR();
 
             }else{
 

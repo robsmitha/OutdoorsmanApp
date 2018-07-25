@@ -95,11 +95,11 @@ public class HarvestRecord {
         String username = (String) userSnapshot.child(USER_NAME).getValue();
         String email = (String) userSnapshot.child(EMAIL).getValue();
         String type = (String) userSnapshot.child(TYPE).getValue();
-        int typeId = (int) userSnapshot.child(TYPE_ID).getValue();
+        int typeId = (int) ((long)userSnapshot.child(TYPE_ID).getValue());
         long date = (long) userSnapshot.child(DATE).getValue();
         double lat = (double) userSnapshot.child(LAT).getValue();
         double lng = (double) userSnapshot.child(LNG).getValue();
-        int id = (int) userSnapshot.child(ID).getValue();
+        int id = (int) ((long)userSnapshot.child(ID).getValue());
 
         return (new HarvestRecord(null)).setUserName(username).setEmail(email)
                 .setType(type).setTypeId(typeId).setDate(date).setLat(lat).setLng(lng)
