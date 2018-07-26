@@ -45,6 +45,8 @@ import java.util.Objects;
  */
 public class MapFragment extends Fragment {
 
+    private static final String TAG = MapFragment.class.getCanonicalName()+"ErrorChecking";
+
     private RecyclerView mRecyclerView;
     private RecordListAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -52,6 +54,7 @@ public class MapFragment extends Fragment {
 
     public final static String ARG_PARAM_HARVEST_ID = "harvest_id";
     private int mParamHarvestId = 0;
+    private int mKeyId = 0;
 
     MapView mMapView;
     private GoogleMap googleMap;
@@ -60,12 +63,30 @@ public class MapFragment extends Fragment {
     private HashMap<HarvestRecord,Marker> hashMapMarker = new HashMap<>();
     Marker mMarker;
 
+    private int getPosFromKey(int key){
+
+        for(int i = 0; i < ((MainActivity)getActivity()).getHarvestRecordArrayList().size(); i++){
+
+            if ( ((MainActivity)getActivity()).getHarvestRecordArrayList().get(i).getId() == key ){
+
+                return i;
+
+            }
+
+        }
+        //else
+        Log.i(TAG, "No matching HarvestRecord found for given ID");
+        return -1;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            mParamHarvestId = getArguments().getInt(ARG_PARAM_HARVEST_ID);
+            //mParamHarvestId = getArguments().getInt(ARG_PARAM_HARVEST_ID);
+            mKeyId = getArguments().getInt(ARG_PARAM_HARVEST_ID);
+            mParamHarvestId = getPosFromKey(mKeyId);
         }
     }
 
@@ -117,7 +138,10 @@ public class MapFragment extends Fragment {
                     public boolean  onMarkerClick(Marker marker) {
 
                         HarvestRecord harvestRecord = (HarvestRecord)marker.getTag();
-                        mParamHarvestId = harvestRecord.getId();
+                        //mParamHarvestId = harvestRecord.getId();
+
+                        mKeyId = harvestRecord.getId();
+                        mParamHarvestId = getPosFromKey(mKeyId);
 
                         CameraPosition cameraPosition = new CameraPosition.Builder().target(harvestRecord.getLatLng()).zoom(ZOOM_LEVEL_5).build();
                         googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +24,8 @@ import java.util.Arrays;
  * A simple {@link Fragment} subclass.
  */
 public class AccountFragment extends Fragment {
+
+    private static final String TAG = AccountFragment.class.getCanonicalName()+"ErrorChecking";
 
     public AccountFragment() {
         // Required empty public constructor
@@ -67,6 +70,24 @@ public class AccountFragment extends Fragment {
                     }
 
                 }
+                //added by rish
+                switch(formType){
+
+                    //is fish
+                    case "Fish": count = ((MainActivity)getActivity()).getMyUserRecord().getNumFish();
+                        break;
+                    //is fowl
+                    case "Fowl": count = ((MainActivity)getActivity()).getMyUserRecord().getNumFowl();
+                        break;
+                    //is deer
+                    case "Deer": count = ((MainActivity)getActivity()).getMyUserRecord().getNumDeer();
+                        break;
+                    //unknown
+                    default:
+                        Log.i(TAG, "Unknown typeId");
+
+                }
+
                 CharSequence message = ""+formType+ " : "+ count;
                 Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
             }

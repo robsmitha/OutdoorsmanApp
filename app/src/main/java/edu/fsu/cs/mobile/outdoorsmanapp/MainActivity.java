@@ -51,6 +51,9 @@ public class MainActivity extends AppCompatActivity {
 
     private Toolbar mToolbar;
     private ArrayList<HarvestRecord> HarvestRecordArrayList;
+    private ArrayList<HarvestRecord> feedHRArrayList;
+    private MapFragment mapFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,6 +73,11 @@ public class MainActivity extends AppCompatActivity {
 
         myUserRecord = new UserRecord();
 
+        HarvestRecordArrayList = new ArrayList<>();
+        feedHRArrayList = new ArrayList<>();
+
+        mapFragment = null;
+
         currentLocation = (new Location(LocationManager.GPS_PROVIDER));
 
         lastLocationAvailable = false;
@@ -78,9 +86,24 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onDestroy(){
+
+        super.onDestroy();
+
+        //firebase tests
+
+        if(mFirebase != null){
+
+            mFirebase.endSession();
+
+        }
+
+    }
+
     private void startPopulateHR(){
 
-        HarvestRecordArrayList = null;
+        HarvestRecordArrayList = new ArrayList<>();
 
         mFirebase.getCurrentUserHarvestRecords();
 
@@ -89,6 +112,66 @@ public class MainActivity extends AppCompatActivity {
     public void onFinishPopulateHR(){
 
         internalOnFragmentChanged(new RecordListFragment());
+
+    }
+
+    private void startPopulateHRForMap(MapFragment mf){
+
+        mapFragment = mf;
+
+        HarvestRecordArrayList = new ArrayList<>();
+
+        mFirebase.getCurrentUserHarvestRecordsForMap();
+
+    }
+
+    public void onFinishPopulateHRForMap(){
+
+        if (mapFragment != null){
+
+            if(mapFragment.getArguments() == null){
+            //originated from MainActivity
+
+                if(getHarvestRecordArrayList().size() > 0){
+
+                    Bundle bundle = new Bundle();
+                    bundle.putInt(MapFragment.ARG_PARAM_HARVEST_ID, getHarvestRecordArrayList().get(0).getId());
+                    mapFragment.setArguments(bundle);
+                    internalOnFragmentChanged(mapFragment);
+
+                }else{
+
+                    Log.i(TAG, "No HarvestRecords available. Did not open MapFragment.");
+                    //No harvest records available, don't open fragment
+                    //TODO: display message to user?
+                }
+
+            }else{
+            //coming from RecordListFragment
+                internalOnFragmentChanged(mapFragment);
+
+            }
+
+        }else{
+
+            //no mapFragment available, unknown error
+            Log.i(TAG, "mapFragment was null: unknown cause");
+
+        }
+
+    }
+
+    private void startPopulateFeedHR(){
+
+        feedHRArrayList = new ArrayList<>();
+
+        mFirebase.getFeedHarvestRecords();
+
+    }
+
+    public void onFinishPopulateFeedHR(){
+
+        internalOnFragmentChanged(new FeedFragment());
 
     }
 
@@ -106,6 +189,21 @@ public class MainActivity extends AppCompatActivity {
         }
         HarvestRecordArrayList.add(harvestRecord);
     }
+
+    public ArrayList<HarvestRecord> getFeedHRArrayList() {
+        if(feedHRArrayList == null){
+            feedHRArrayList = new ArrayList<>();
+        }
+        return feedHRArrayList;
+    }
+
+    public void addFeedHRArrayListItem(HarvestRecord harvestRecord){
+        if(feedHRArrayList == null){
+            feedHRArrayList = new ArrayList<>();
+        }
+        feedHRArrayList.add(harvestRecord);
+    }
+
     //END Temporary ArrayList methods for testing
 
     private void internalOnFragmentChanged(Fragment fragment){
@@ -129,6 +227,14 @@ public class MainActivity extends AppCompatActivity {
             }else if (fragment instanceof RecordListFragment){
 
                 startPopulateHR();
+
+            }else if (fragment instanceof MapFragment){
+
+                startPopulateHRForMap((MapFragment) fragment);
+
+            }else if (fragment instanceof FeedFragment){
+
+                startPopulateFeedHR();
 
             }else{
 
@@ -393,6 +499,10 @@ public class MainActivity extends AppCompatActivity {
         myUserRecord = userRecord;
     }
 
+    public UserRecord getMyUserRecord() {
+        return myUserRecord;
+    }
+
     public boolean isLastLocationAvailable() {
         return lastLocationAvailable;
     }
@@ -425,16 +535,18 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_record_list:
                 RecordListFragment recordListFragment = new RecordListFragment();
                 OnFragmentReplaced(recordListFragment);
+                //test
+                //OnFragmentReplaced(new FeedFragment());
                 break;
             case R.id.action_map:
-                if(!getHarvestRecordArrayList().isEmpty()){
-                    MapFragment mapFragment = new MapFragment();
-                    Bundle bundle = new Bundle();
-                    bundle.putInt(MapFragment.ARG_PARAM_HARVEST_ID, getHarvestRecordArrayList().get(0).getId());
-                    mapFragment.setArguments(bundle);
-                    OnFragmentReplaced(mapFragment);
-                }
+                /*
+                MapFragment mapFragment = new MapFragment();
+                Bundle bundle = new Bundle();
+                bundle.putInt(MapFragment.ARG_PARAM_HARVEST_ID, getHarvestRecordArrayList().get(0).getId());
+                mapFragment.setArguments(bundle);
+                */
 
+                OnFragmentReplaced(new MapFragment());
 
                 break;
         }

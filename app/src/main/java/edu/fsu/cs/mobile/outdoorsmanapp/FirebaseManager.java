@@ -190,6 +190,39 @@ public class FirebaseManager {
             public void onCancelled(DatabaseError error) {
                 // Failed to read value
                 Log.w(TAG, "Failed to read value.", error.toException());
+                mActivity.setMyUserRecord(new UserRecord(getCurrentUser()));
+            }
+
+        });
+
+    }
+
+    public void getCurrentUserHarvestRecordsForMap(){
+
+        final String key = UserRecord.getKeyFromEmail(getCurrentUserEmail());
+
+        mDatabase.child(RECORDS_TABLE).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                for(DataSnapshot hRSnapshot : snapshot.getChildren()) {
+                    String key = hRSnapshot.getKey();
+                    HarvestRecord newHR = HarvestRecord.fromDataSnapshot(hRSnapshot);
+
+                    if (newHR.getKeyFromEmail().equals(HarvestRecord.getKeyFromEmail(getCurrentUserEmail()))){
+                        //records belong to this user
+                        mActivity.addHarvestRecordArrayListItem(newHR);
+
+                    }
+
+                }
+                mActivity.onFinishPopulateHRForMap();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.w(TAG, "Failed to read value.", error.toException());
+                mActivity.onFinishPopulateHRForMap();
             }
 
         });
@@ -221,6 +254,40 @@ public class FirebaseManager {
             public void onCancelled(DatabaseError error) {
                 // Failed to read value
                 Log.w(TAG, "Failed to read value.", error.toException());
+                mActivity.onFinishPopulateHR();
+            }
+
+        });
+
+    }
+
+    public void getFeedHarvestRecords(){
+
+        final String key = UserRecord.getKeyFromEmail(getCurrentUserEmail());
+
+        mDatabase.child(RECORDS_TABLE).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                for(DataSnapshot hRSnapshot : snapshot.getChildren()) {
+                    String key = hRSnapshot.getKey();
+                    HarvestRecord newHR = HarvestRecord.fromDataSnapshot(hRSnapshot);
+
+                    if (newHR.getKeyFromEmail().equals(HarvestRecord.getKeyFromEmail(getCurrentUserEmail()))){
+                        //records belong to this user
+                        mActivity.addHarvestRecordArrayListItem(newHR);
+
+                    }
+                    mActivity.addFeedHRArrayListItem(newHR);
+
+                }
+                mActivity.onFinishPopulateFeedHR();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.w(TAG, "Failed to read value.", error.toException());
+                mActivity.onFinishPopulateFeedHR();
             }
 
         });
@@ -230,7 +297,7 @@ public class FirebaseManager {
     public void addToDatabase(HarvestRecord hr){
         String key = mDatabase.child(RECORDS_TABLE).push().getKey();
         //TODO figure out id scenario. Firebase generated key/ID is not int, but MapFragment dependent on int id
-        //hr.setId(key);
+        hr.setId(key.hashCode());
 
         Map<String, Object> postValues = hr.toMap();
         Map<String, Object> childUpdates = new HashMap<>();
@@ -292,6 +359,7 @@ public class FirebaseManager {
                     }
 
                     addToDatabase(tempUserRecord);
+                    mActivity.setMyUserRecord(tempUserRecord);
 
                 }else{
 
