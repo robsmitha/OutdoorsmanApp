@@ -1,0 +1,4 @@
+Calendar previous month bug
+Google maps open
+If permission declined once, app crashes
+Google signin slow/crash
