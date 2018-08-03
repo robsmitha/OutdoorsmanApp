@@ -1,6 +1,8 @@
 package edu.fsu.cs.mobile.outdoorsmanapp;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 
 public class RecordListAdapter extends RecyclerView.Adapter<RecordListAdapter.ViewHolder> {
 
@@ -24,35 +25,37 @@ public class RecordListAdapter extends RecyclerView.Adapter<RecordListAdapter.Vi
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
 
-        public ViewHolder(View view) {
+        ViewHolder(View view) {
             super(view);
 
         }
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public RecordListAdapter(Context context, ArrayList<HarvestRecord> myDataset) {
+    RecordListAdapter(Context context, ArrayList<HarvestRecord> myDataset) {
         mDataset = myDataset;
         mContext = context;
     }
 
     // Create new views (invoked by the layout manager)
+    @NonNull
     @Override
-    public RecordListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecordListAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // create a new view
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.record_list_model, parent, false);
         // set the view's size, margins, paddings and layout parameters
 
-        ViewHolder vh = new ViewHolder(v);
-        return vh;
+        return new ViewHolder(v);
     }
 
 
     // Replace the contents of a view (invoked by the layout manager)
+    
+    @SuppressLint("SetTextI18n")
     @Override
-    public void onBindViewHolder(final ViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder holder, @SuppressLint("RecyclerView") final int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         final HarvestRecord model = getItem(position);
@@ -63,25 +66,21 @@ public class RecordListAdapter extends RecyclerView.Adapter<RecordListAdapter.Vi
             }
         });
         TextView textViewId = holder.itemView.findViewById(R.id.textViewId);
-        textViewId.setText("Harvest ID: "+model.getId());
+        textViewId.setText(mContext.getString(R.string.harvestID)+model.getId());
         TextView textViewTypeId = holder.itemView.findViewById(R.id.textViewTypeId);
-        textViewTypeId.setText("Type ID: "+model.getTypeId());
+        textViewTypeId.setText(mContext.getString(R.string.typeID)+model.getTypeId());
         TextView textViewType = holder.itemView.findViewById(R.id.textViewType);
-        textViewType.setText("Type: "+model.getType());
+        textViewType.setText(mContext.getString(R.string.type)+model.getType());
         TextView textViewDate = holder.itemView.findViewById(R.id.textViewDate);
 
         textViewDate.setText(""+model.getDateString());
         TextView textViewLocation = holder.itemView.findViewById(R.id.textViewLocation);
-        textViewLocation.setText("Location: lat: "+model.getLatLng().latitude+ " lng: " + ""+model.getLatLng().longitude);
+        textViewLocation.setText(mContext.getString(R.string.locColonLat)+model.getLatLng().latitude+ " lng: " + ""+model.getLatLng().longitude);
 
     }
 
     private HarvestRecord getItem(int position) {
         return mDataset.get(position);
-    }
-
-    private Context getContext() {
-        return mContext;
     }
 
     // Return the size of your dataset (invoked by the layout manager)

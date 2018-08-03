@@ -1,10 +1,7 @@
 package edu.fsu.cs.mobile.outdoorsmanapp;
 
-
-import android.content.Context;
-import android.content.Intent;
-import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -13,19 +10,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
-
-import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-
 
 /**
  * A simple {@link Fragment} subclass.
@@ -37,24 +23,13 @@ public class RecordListFragment extends Fragment {
 
     private static final String mHarvestID = "harvest_id";
 
-    private RecyclerView mRecyclerView;
-    private RecordListAdapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
-    private ArrayList<HarvestRecord> myHarvestRecords;
-
 
     public RecordListFragment() {
         // Required empty public constructor
     }
 
-    private void populateHarvestRecords(){
-
-
-
-    }
-
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
@@ -67,13 +42,13 @@ public class RecordListFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
+        RecyclerView mRecyclerView = view.findViewById(R.id.recyclerView);
 
         // use a linear layout manager
-        mLayoutManager = new LinearLayoutManager(getActivity());
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         Log.i(TAG, "RecordListFragment.onViewCreated()");
@@ -92,7 +67,7 @@ public class RecordListFragment extends Fragment {
                 }
             });
             */
-            mAdapter = new RecordListAdapter(getActivity(), arrayList);
+            RecordListAdapter mAdapter = new RecordListAdapter(getActivity(), arrayList);
 
             mRecyclerView.setAdapter(mAdapter);
             Log.i(TAG, "RecordListFragment.onViewCreated():setAdapter()");
@@ -116,6 +91,6 @@ public class RecordListFragment extends Fragment {
     }
 
     public interface OnItemClick {
-        public void onItemClicked(View view, int position, Object data);
+        void onItemClicked(View view, int position, Object data);
     }
 }

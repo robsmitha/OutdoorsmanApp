@@ -20,22 +20,17 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     public static final int RC_SIGN_IN = 1234;
@@ -49,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
     private UserRecord myUserRecord;
     private boolean lastLocationAvailable;
 
-    private Toolbar mToolbar;
     private ArrayList<HarvestRecord> HarvestRecordArrayList;
     private ArrayList<HarvestRecord> feedHRArrayList;
     private MapFragment mapFragment;
@@ -60,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mToolbar = (Toolbar) findViewById(R.id.action_bar);
+        Toolbar mToolbar = findViewById(R.id.action_bar);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
@@ -247,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public boolean checkLocationPermission() {
+    public void checkLocationPermission() {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -281,9 +275,6 @@ public class MainActivity extends AppCompatActivity {
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         MY_PERMISSIONS_REQUEST_LOCATION);
             }
-            return false;
-        } else {
-            return true;
         }
     }
 
@@ -301,11 +292,15 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        } catch(Exception ex) {}
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
 
         try {
             network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        } catch(Exception ex) {}
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        }
 
         if(!gps_enabled && !network_enabled) {
             // notify user
@@ -504,10 +499,6 @@ public class MainActivity extends AppCompatActivity {
         return myUserRecord;
     }
 
-    public boolean isLastLocationAvailable() {
-        return lastLocationAvailable;
-    }
-
     public Location getCurrentLocation() {
         return currentLocation;
     }
@@ -577,7 +568,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+                                           @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_LOCATION: {
                 // If request is cancelled, the result arrays are empty.
@@ -598,7 +589,6 @@ public class MainActivity extends AppCompatActivity {
                     Log.i(TAG, "Location Permission Denied");
 
                 }
-                return;
             }
 
         }

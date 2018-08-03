@@ -1,8 +1,7 @@
 package edu.fsu.cs.mobile.outdoorsmanapp;
 
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,10 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -38,18 +35,29 @@ public class AccountFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_account, container, false);
-        TextView textView = view.findViewById(R.id.textViewAccount);
-
 
         //TODO: Set up badges
 
         final String[] form_types = getResources().getStringArray(R.array.form_types);
 
-        final ArrayList<HarvestRecord> arrayList =((MainActivity)getActivity()).getHarvestRecordArrayList();
+        ArrayList<HarvestRecord> tempArrayList;
+
+        try{
+
+            tempArrayList = ((MainActivity)getActivity()).getHarvestRecordArrayList();
+
+        }catch (NullPointerException n){
+
+            tempArrayList = new ArrayList<>();
+            n.printStackTrace();
+        }
+
+        final ArrayList<HarvestRecord> arrayList =tempArrayList;
+
         ListView mainListView = view.findViewById(R.id.mainListView);
         mainListView = AddListViewAdapter(mainListView, form_types);
         mainListView.setClickable(true);
@@ -93,7 +101,7 @@ public class AccountFragment extends Fragment {
             }
         });
 
-        ImageButton imageButtonForm = (ImageButton) view.findViewById(R.id.imageButtonForm);
+        ImageButton imageButtonForm = view.findViewById(R.id.imageButtonForm);
         imageButtonForm.setOnClickListener( new View.OnClickListener() {
 
             @Override
@@ -103,7 +111,7 @@ public class AccountFragment extends Fragment {
             }
         });
 
-        ImageButton imageButtonRecords = (ImageButton) view.findViewById(R.id.imageButtonRecords);
+        ImageButton imageButtonRecords = view.findViewById(R.id.imageButtonRecords);
         imageButtonRecords.setOnClickListener( new View.OnClickListener() {
 
             @Override
@@ -116,8 +124,7 @@ public class AccountFragment extends Fragment {
     }
     private ListView AddListViewAdapter(ListView mylistview, String[] strings){
         //create ArrayList to bind adapater
-        ArrayList<String> adapterList = new ArrayList<>();
-        adapterList.addAll(Arrays.asList(strings));
+        ArrayList<String> adapterList = new ArrayList<>(Arrays.asList(strings));
 
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>
                 (getContext(), android.R.layout.simple_list_item_1, adapterList);

@@ -1,13 +1,10 @@
 package edu.fsu.cs.mobile.outdoorsmanapp;
 
-import android.support.annotation.NonNull;
-
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,7 +30,7 @@ public class HarvestRecord {
     //private LatLng latLng;
 
 
-    public HarvestRecord(@NonNull FirebaseUser mUser){
+    HarvestRecord(FirebaseUser mUser){
 
         if(mUser != null){
 
@@ -55,7 +52,7 @@ public class HarvestRecord {
 
     }
 
-    public HarvestRecord(){
+    HarvestRecord(){
 
         this(null);
 
@@ -91,7 +88,7 @@ public class HarvestRecord {
     }
 
     public static HarvestRecord fromDataSnapshot(DataSnapshot userSnapshot) {
-        String key = (String) userSnapshot.getKey();
+
         String username = (String) userSnapshot.child(USER_NAME).getValue();
         String email = (String) userSnapshot.child(EMAIL).getValue();
         String type = (String) userSnapshot.child(TYPE).getValue();
@@ -106,7 +103,7 @@ public class HarvestRecord {
                 .setId(id);
     }
 
-    public Calendar convertMillisToCalendar(long ms){
+    private Calendar convertMillisToCalendar(long ms){
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(ms);
@@ -124,7 +121,7 @@ public class HarvestRecord {
 
         int mHour = calendar.get(Calendar.HOUR);
         int mMinute = calendar.get(Calendar.MINUTE);
-        int mSecond = calendar.get(Calendar.SECOND);
+        calendar.get(Calendar.SECOND);
 
 
         CharSequence AM_OR_PM = calendar.get(Calendar.AM_PM) == 1 ? "PM" : "AM";
@@ -147,9 +144,6 @@ public class HarvestRecord {
     }
 
     //getters
-    public String getUserName() {
-        return userName;
-    }
 
     public String getEmail() {
         return email;
@@ -176,7 +170,7 @@ public class HarvestRecord {
     }
 
     //setters
-    public HarvestRecord setUserName(String userName) {
+    private HarvestRecord setUserName(String userName) {
         this.userName = userName;
         return this;
     }
@@ -201,14 +195,14 @@ public class HarvestRecord {
         return this;
     }
 
-    public HarvestRecord setLat(double lat){
+    private HarvestRecord setLat(double lat){
 
         this.lat = lat;
         return this;
 
     }
 
-    public HarvestRecord setLng(double lng){
+    private HarvestRecord setLng(double lng){
 
         this.lng = lng;
         return this;

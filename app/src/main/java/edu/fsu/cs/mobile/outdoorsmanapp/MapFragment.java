@@ -1,8 +1,10 @@
 package edu.fsu.cs.mobile.outdoorsmanapp;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -18,7 +20,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CalendarView;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -47,9 +48,6 @@ public class MapFragment extends Fragment {
 
     private static final String TAG = MapFragment.class.getCanonicalName()+"ErrorChecking";
 
-    private RecyclerView mRecyclerView;
-    private RecordListAdapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
     private GestureDetector mDetector;
 
     public final static String ARG_PARAM_HARVEST_ID = "harvest_id";
@@ -91,11 +89,11 @@ public class MapFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_map, container, false);
 
-        mMapView = (MapView) rootView.findViewById(R.id.mapView);
+        mMapView = rootView.findViewById(R.id.mapView);
         mMapView.onCreate(savedInstanceState);
 
         mMapView.onResume(); // needed to get the map to display immediately
@@ -180,7 +178,7 @@ public class MapFragment extends Fragment {
 
                 //Show marker
                 Marker thisMarker = hashMapMarker.get(harvestRecord);
-                thisMarker.showInfoWindow();;
+                thisMarker.showInfoWindow();
 
                 googleMap.getUiSettings().setZoomControlsEnabled(true);
             }
@@ -204,17 +202,17 @@ public class MapFragment extends Fragment {
     }
 
     private void BindRecyclerView(View view){
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
+        RecyclerView mRecyclerView = view.findViewById(R.id.recyclerView);
 
         // use a linear layout manager
-        mLayoutManager = new LinearLayoutManager(getActivity());
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         ArrayList<HarvestRecord> arrayList = new ArrayList<>();
         arrayList.add(((MainActivity)getActivity()).getHarvestRecordArrayList().get(mParamHarvestId));  //add single HarvestRecord
 
         if(!arrayList.isEmpty()){
-            mAdapter = new RecordListAdapter(getActivity(), arrayList);
+            RecordListAdapter mAdapter = new RecordListAdapter(getActivity(), arrayList);
             mRecyclerView.setAdapter(mAdapter);
             mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
@@ -310,7 +308,7 @@ public class MapFragment extends Fragment {
             BindRecyclerView(getView());
 
             Marker marker = hashMapMarker.get(harvestRecord);
-            marker.showInfoWindow();;
+            marker.showInfoWindow();
             return true;
         }
 
@@ -358,11 +356,12 @@ public class MapFragment extends Fragment {
 
         final TextView textView = new TextView(getContext());
         final Button button = new Button(getContext());
-        button.setText("Confirm");
+        button.setText(getString(R.string.confirm));
 
 
 
         button.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SetTextI18n")
             @Override
             public void onClick(View v) {
 
@@ -377,13 +376,13 @@ public class MapFragment extends Fragment {
                 harvestRecord.setLatLng(position);
                 ((MainActivity)getActivity()).addHarvestRecordArrayListItem(harvestRecord);
 
-                textView.setText(formType+" Submitted");
+                textView.setText(formType+getString(R.string.submitted));
                 textView.setVisibility(View.VISIBLE);
 
 
                 LatLng location = harvestRecord.getLatLng();
-                String title = "Type: " + harvestRecord.getType();
-                String snippet = "Date: " + harvestRecord.getDateString();
+                String title = getString(R.string.type) + harvestRecord.getType();
+                String snippet = getString(R.string.date) + harvestRecord.getDateString();
 
                 mMarker = googleMap.addMarker(new MarkerOptions()
                         .position(location)
@@ -407,6 +406,7 @@ public class MapFragment extends Fragment {
         final ListView finalListView = listView;
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
                 Object listItemObj = finalListView.getItemAtPosition(position);
@@ -416,7 +416,7 @@ public class MapFragment extends Fragment {
                 finalListView.setVisibility(View.INVISIBLE);
 
 
-                textView.setText("Please confirm "+formType+" form.");
+                textView.setText(getString(R.string.pleaseConfirm)+formType+getString(R.string.formDot));
                 textView.setVisibility(View.VISIBLE);
                 button.setVisibility(View.VISIBLE);
 
@@ -439,7 +439,7 @@ public class MapFragment extends Fragment {
         calendarView.setDate(c.getTimeInMillis(),false,true);
         calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             @Override
-            public void onSelectedDayChange(CalendarView view, int year, int month,
+            public void onSelectedDayChange(@NonNull CalendarView view, int year, int month,
                                             int day) {
                 c = Calendar.getInstance();
                 c.clear();

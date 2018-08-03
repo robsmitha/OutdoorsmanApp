@@ -15,6 +15,24 @@
     <string name="gps_network_not_enabled">Location Services not enabled</string>
     <string name="open_location_settings">Open Location Settings</string>
     <string name="cancel">Cancel</string>
+    <string name="enterDate">Enter the Date</string>
+    <string name="recCurDate">Record the Current Date</string>
+    <string name="pickLoc">Pick Location</string>
+    <string name="recCurLoc">Record Current Location</string>
+    <string name="latitude">Latitude: </string>
+    <string name="longitude">Longitude: </string>
+    <string name="chooseDate">Choose Date</string>
+    <string name="chooseLoc">Choose Location</string>
+    <string name="formSubmitted">Form Type submitted at: </string>
+    <string name="confirm">Confirm</string>
+    <string name="submitted">Submitted</string>
+    <string name="type">Type: </string>
+    <string name="date">Date: </string>
+    <string name="pleaseConfirm">Please confirm </string>
+    <string name="formDot">form.</string>
+    <string name="harvestID">Harvest ID: </string>
+    <string name="locColonLat">Location: lat:</string>
+    <string name="typeID">Type ID: </string>
 
     <string-array name="form_types">
         <item>Fish</item>

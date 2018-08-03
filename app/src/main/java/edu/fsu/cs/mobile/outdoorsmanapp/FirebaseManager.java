@@ -6,7 +6,6 @@ import android.util.Log;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
-import com.firebase.ui.auth.data.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -18,7 +17,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,30 +27,16 @@ public class FirebaseManager {
     private static String ANON = "anon";
     private static String USER_TABLE = "Users";
     private static String RECORDS_TABLE  = "Records";
-    private static String LOBBY = "lobby";
-
-
 
     private MainActivity mActivity;
-    private boolean firebaseSignedIn;
     private FirebaseUser mUser;
     private DatabaseReference mDatabase;
-    private DatabaseReference mTable;
-    private String mSessionName;
 
-    public FirebaseManager(MainActivity m) {
-
-        this(m, ANON + Calendar.getInstance().getTimeInMillis());
-
-    }
-
-    public FirebaseManager(MainActivity m, String sessionName){
+    FirebaseManager(MainActivity m) {
 
         this.mActivity = m;
-        this.firebaseSignedIn = false;
         this.mUser = null;
         this.mDatabase = FirebaseDatabase.getInstance().getReference();
-        this.mSessionName = sessionName;
 
     }
 
@@ -64,7 +48,6 @@ public class FirebaseManager {
             if (resultCode == MainActivity.RESULT_OK) {
                 // Successfully signed in
                 mUser = FirebaseAuth.getInstance().getCurrentUser();
-                firebaseSignedIn = true;
                 mDatabase = FirebaseDatabase.getInstance().getReference();
                 checkUserRecord();
                 return true;
@@ -91,12 +74,6 @@ public class FirebaseManager {
         }
 
         return false;
-
-    }
-
-    public void setSessionName(String s){
-
-        this.mSessionName = s;
 
     }
 
@@ -129,25 +106,8 @@ public class FirebaseManager {
                     }
                 });
 
-        firebaseSignedIn = false;
         mDatabase = null;
         mUser = null;
-        mTable = null;
-        mSessionName = null;
-
-    }
-
-    //not tested yet
-    public void deleteUser(){
-
-        AuthUI.getInstance()
-                .delete(mActivity)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        // ...
-                    }
-                });
 
     }
 
@@ -157,7 +117,7 @@ public class FirebaseManager {
 
     }
 
-    public String getCurrentUserEmail(){
+    private String getCurrentUserEmail(){
 
         return mUser.getEmail();
 
@@ -169,7 +129,7 @@ public class FirebaseManager {
 
         mDatabase.child(USER_TABLE).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot snapshot) {
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.hasChild(key)) {
                     Log.i(TAG, "User with key: "+key+" exists");
                     mActivity.setMyUserRecord(UserRecord.fromDataSnapshot(snapshot.child(key)));
@@ -187,7 +147,7 @@ public class FirebaseManager {
             }
 
             @Override
-            public void onCancelled(DatabaseError error) {
+            public void onCancelled(@NonNull DatabaseError error) {
                 // Failed to read value
                 Log.w(TAG, "Failed to read value.", error.toException());
                 mActivity.setMyUserRecord(new UserRecord(getCurrentUser()));
@@ -199,13 +159,11 @@ public class FirebaseManager {
 
     public void getCurrentUserHarvestRecordsForMap(){
 
-        final String key = UserRecord.getKeyFromEmail(getCurrentUserEmail());
-
         mDatabase.child(RECORDS_TABLE).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot snapshot) {
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for(DataSnapshot hRSnapshot : snapshot.getChildren()) {
-                    String key = hRSnapshot.getKey();
+
                     HarvestRecord newHR = HarvestRecord.fromDataSnapshot(hRSnapshot);
 
                     if (newHR.getKeyFromEmail().equals(HarvestRecord.getKeyFromEmail(getCurrentUserEmail()))){
@@ -219,7 +177,7 @@ public class FirebaseManager {
             }
 
             @Override
-            public void onCancelled(DatabaseError error) {
+            public void onCancelled(@NonNull DatabaseError error) {
                 // Failed to read value
                 Log.w(TAG, "Failed to read value.", error.toException());
                 mActivity.onFinishPopulateHRForMap();
@@ -231,13 +189,11 @@ public class FirebaseManager {
 
     public void getCurrentUserHarvestRecords(){
 
-        final String key = UserRecord.getKeyFromEmail(getCurrentUserEmail());
-
         mDatabase.child(RECORDS_TABLE).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot snapshot) {
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for(DataSnapshot hRSnapshot : snapshot.getChildren()) {
-                    String key = hRSnapshot.getKey();
+
                     HarvestRecord newHR = HarvestRecord.fromDataSnapshot(hRSnapshot);
 
                     if (newHR.getKeyFromEmail().equals(HarvestRecord.getKeyFromEmail(getCurrentUserEmail()))){
@@ -251,7 +207,7 @@ public class FirebaseManager {
             }
 
             @Override
-            public void onCancelled(DatabaseError error) {
+            public void onCancelled(@NonNull DatabaseError error) {
                 // Failed to read value
                 Log.w(TAG, "Failed to read value.", error.toException());
                 mActivity.onFinishPopulateHR();
@@ -263,13 +219,11 @@ public class FirebaseManager {
 
     public void getFeedHarvestRecords(){
 
-        final String key = UserRecord.getKeyFromEmail(getCurrentUserEmail());
-
         mDatabase.child(RECORDS_TABLE).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot snapshot) {
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for(DataSnapshot hRSnapshot : snapshot.getChildren()) {
-                    String key = hRSnapshot.getKey();
+
                     HarvestRecord newHR = HarvestRecord.fromDataSnapshot(hRSnapshot);
 
                     if (newHR.getKeyFromEmail().equals(HarvestRecord.getKeyFromEmail(getCurrentUserEmail()))){
@@ -284,7 +238,7 @@ public class FirebaseManager {
             }
 
             @Override
-            public void onCancelled(DatabaseError error) {
+            public void onCancelled(@NonNull DatabaseError error) {
                 // Failed to read value
                 Log.w(TAG, "Failed to read value.", error.toException());
                 mActivity.onFinishPopulateFeedHR();
@@ -294,7 +248,7 @@ public class FirebaseManager {
 
     }
 
-    public void addToDatabase(HarvestRecord hr){
+    private void addToDatabase(HarvestRecord hr){
         String key = mDatabase.child(RECORDS_TABLE).push().getKey();
         //TODO figure out id scenario. Firebase generated key/ID is not int, but MapFragment dependent on int id
         hr.setId(key.hashCode());
@@ -311,7 +265,7 @@ public class FirebaseManager {
 
     }
 
-    public void addToDatabase(UserRecord ur){
+    private void addToDatabase(UserRecord ur){
         //String key = mDatabase.child(MAIN_TABLE).push().getKey();
         String key = ur.getKeyFromEmail();
 
@@ -337,7 +291,7 @@ public class FirebaseManager {
 
         mDatabase.child(USER_TABLE).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot snapshot) {
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.hasChild(key)) {
                     Log.i(TAG, "User with key: "+key+" exists. Updating...");
 
@@ -369,7 +323,7 @@ public class FirebaseManager {
             }
 
             @Override
-            public void onCancelled(DatabaseError error) {
+            public void onCancelled(@NonNull DatabaseError error) {
                 // Failed to read value
                 Log.w(TAG, "Failed to read value.", error.toException());
             }

@@ -1,7 +1,5 @@
 package edu.fsu.cs.mobile.outdoorsmanapp;
 
-import android.support.annotation.NonNull;
-
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 
@@ -22,7 +20,7 @@ public class UserRecord {
     private int numFowl;
     private int numDeer;
 
-    public UserRecord(@NonNull FirebaseUser mUser){
+    UserRecord(FirebaseUser mUser){
 
         if(mUser != null){
 
@@ -41,7 +39,7 @@ public class UserRecord {
 
     }
 
-    public UserRecord(){
+    UserRecord(){
 
         this(null);
 
@@ -70,7 +68,7 @@ public class UserRecord {
     }
 
     public static UserRecord fromDataSnapshot(DataSnapshot userSnapshot) {
-        String key = (String) userSnapshot.getKey();
+
         String username = (String) userSnapshot.child(USER_NAME).getValue();
         String email = (String) userSnapshot.child(EMAIL).getValue();
         int numFish = (int) ((long)userSnapshot.child(NUM_FISH).getValue());
@@ -93,11 +91,6 @@ public class UserRecord {
 
     }
 
-    //getters
-    public String getUserName() {
-        return userName;
-    }
-
     public String getEmail() {
         return email;
     }
@@ -115,7 +108,7 @@ public class UserRecord {
     }
 
     //setters
-    public UserRecord setUserName(String userName) {
+    private UserRecord setUserName(String userName) {
         this.userName = userName;
         return this;
     }

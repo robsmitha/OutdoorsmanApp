@@ -1,23 +1,21 @@
 package edu.fsu.cs.mobile.outdoorsmanapp;
 
 
+import android.annotation.SuppressLint;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -29,14 +27,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -47,7 +40,6 @@ public class FormFragment extends Fragment {
     Marker mMarker;
     private GoogleMap googleMap;
     private final static int ZOOM_LEVEL_5 = 5;
-    private final static int ZOOM_LEVEL_11 = 11;
 
     public static int harvestRecordCounter = 0;
     public final static int case_submit_again = 0;
@@ -58,7 +50,6 @@ public class FormFragment extends Fragment {
     long harvestDate;
     Calendar c;
 
-    private boolean lastLocationAvailable;
     private Location mainActivityLocation;
 
     public FormFragment() {
@@ -73,12 +64,12 @@ public class FormFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
         View view =  inflater.inflate(R.layout.fragment_form, container, false);
-        mMapView = (MapView) view.findViewById(R.id.mapView);
+        mMapView = view.findViewById(R.id.mapView);
 
         mMapView.onCreate(savedInstanceState);
 
@@ -90,8 +81,7 @@ public class FormFragment extends Fragment {
 
     private void getLastLocation(){
 
-        lastLocationAvailable = ((MainActivity) getActivity()).isLastLocationAvailable();
-        mainActivityLocation = ((MainActivity) getActivity()).getCurrentLocation();
+        mainActivityLocation = ((MainActivity) Objects.requireNonNull(getActivity())).getCurrentLocation();
         latitude = mainActivityLocation.getLatitude();
         longitude = mainActivityLocation.getLongitude();
 
@@ -116,8 +106,9 @@ public class FormFragment extends Fragment {
         harvestDate = calendarViewCurrentDate.getDate();
 
         calendarViewCurrentDate.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
+            @SuppressLint("SetTextI18n")
             @Override
-            public void onSelectedDayChange(CalendarView view, int year, int month,
+            public void onSelectedDayChange(@NonNull CalendarView view, int year, int month,
                                             int day) {
                 c = Calendar.getInstance();
                 c.clear();
@@ -137,13 +128,13 @@ public class FormFragment extends Fragment {
                 if(!isChecked){
                     calendarViewCurrentDate.setDateTextAppearance(Calendar.getInstance().getFirstDayOfWeek());
                     calendarViewCurrentDate.setEnabled(true);
-                    switchCurrentDate.setText("Enter the Date");
+                    switchCurrentDate.setText(R.string.enterDate);
                     calendarViewCurrentDate.setVisibility(View.VISIBLE);
                 }else{
                     //we're going to grab the current time at the time of submission
                     //calendarViewCurrentDate.setDate(System.currentTimeMillis());
                     calendarViewCurrentDate.setEnabled(false);
-                    switchCurrentDate.setText("Record the Current Date");
+                    switchCurrentDate.setText(R.string.recCurDate);
                     calendarViewCurrentDate.setVisibility(View.INVISIBLE);
                 }
             }
@@ -169,11 +160,11 @@ public class FormFragment extends Fragment {
                     latitude = 0;
                     longitude = 0;
                     mMapView.setVisibility(View.VISIBLE);
-                    switchCurrentLocation.setText("Pick Location");    //update label
+                    switchCurrentLocation.setText(R.string.pickLoc);    //update label
                 }else{
                     getLastLocation();
                     mMapView.setVisibility(View.GONE);
-                    switchCurrentLocation.setText("Record Current Location");   //update label
+                    switchCurrentLocation.setText(R.string.recCurLoc);   //update label
                 }
             }
         });
@@ -193,6 +184,7 @@ public class FormFragment extends Fragment {
 
 
                 googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                    @SuppressLint("SetTextI18n")
                     @Override
                     public void onMapClick(LatLng point) {
 
@@ -202,10 +194,10 @@ public class FormFragment extends Fragment {
 
                         latitude = point.latitude;
                         longitude = point.longitude;
-                        switchCurrentLocation.setText("Latitude: "+latitude + " Longitude: "+longitude);
+                        switchCurrentLocation.setText(getString(R.string.latitude)+latitude + getString(R.string.longitude)+longitude);
 
-                        String title = "Latitude: " + latitude;
-                        String snippet = "Longitude: " + longitude;
+                        String title = getString(R.string.latitude)+latitude + latitude;
+                        String snippet = getString(R.string.longitude) + longitude;
 
                         mMarker = googleMap.addMarker(new MarkerOptions()
                                 .position(point)
@@ -248,6 +240,7 @@ public class FormFragment extends Fragment {
         });
     }
 
+    @SuppressLint("SetTextI18n")
     private void ConfirmFormType(String formType, int typeId){
 
         View view = getView();
@@ -260,7 +253,7 @@ public class FormFragment extends Fragment {
 
         if(!switchCurrentDate.isChecked()){
             if(calendarViewCurrentDate.getDate() == 0){
-                switchCurrentDate.setText("Choose Date");
+                switchCurrentDate.setText(R.string.chooseDate);
                 isValid = false;
             }
             else {
@@ -271,7 +264,7 @@ public class FormFragment extends Fragment {
         Switch switchCurrentLocation = view.findViewById(R.id.switchRecordLocation);
 
         if(longitude == 0 && latitude == 0){
-            switchCurrentLocation.setText("Choose Location");
+            switchCurrentLocation.setText(R.string.chooseLoc);
             isValid = false;
         }
 
@@ -300,7 +293,7 @@ public class FormFragment extends Fragment {
             ((MainActivity)getActivity()).updateRecord(harvestRecord);
 
             //Set UI message
-            textView.setText(formType + " Form Type submitted at: " + harvestRecord.getDateString());
+            textView.setText(formType + getString(R.string.formSubmitted) + harvestRecord.getDateString());
 
 
             //rebind listview with "after submit options", what to do after submission
@@ -309,7 +302,6 @@ public class FormFragment extends Fragment {
             mainListView = AddListViewAdapter(mainListView, form_types_after_submit_options);
             mainListView.setClickable(true);
 
-            final ListView finalMainListView = mainListView;
             mainListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
                 @Override
