@@ -42,7 +42,6 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseManager mFirebase;
     private Location currentLocation;
     private UserRecord myUserRecord;
-    private boolean lastLocationAvailable;
 
     private ArrayList<HarvestRecord> HarvestRecordArrayList;
     private ArrayList<HarvestRecord> feedHRArrayList;
@@ -71,8 +70,6 @@ public class MainActivity extends AppCompatActivity {
         mapFragment = null;
 
         currentLocation = (new Location(LocationManager.GPS_PROVIDER));
-
-        lastLocationAvailable = false;
 
         checkLocationPermission();
 
@@ -326,8 +323,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void getLastLocationFormFrag(){
 
-        lastLocationAvailable = false;
-
         checkLocationPermission();
 
         checkLocationEnabled();
@@ -346,12 +341,10 @@ public class MainActivity extends AppCompatActivity {
                                 if (location != null) {
                                     //getAddress(location);
                                     Log.i(TAG, "Location returned non null: "+location.toString());
-                                    lastLocationAvailable = true;
                                     currentLocation = location;
                                     internalOnFragmentChanged(new FormFragment());
                                 }else{
                                     Log.i(TAG, "location returned null");
-                                    lastLocationAvailable = false;
                                     currentLocation = (new Location(LocationManager.GPS_PROVIDER));
                                     currentLocation.reset();
                                     internalOnFragmentChanged(new FormFragment());
@@ -365,7 +358,6 @@ public class MainActivity extends AppCompatActivity {
                                 Log.d(TAG, "Error trying to get last GPS location");
                                 e.printStackTrace();
 
-                                lastLocationAvailable = false;
                                 currentLocation = (new Location(LocationManager.GPS_PROVIDER));
                                 currentLocation.reset();
 
@@ -376,7 +368,6 @@ public class MainActivity extends AppCompatActivity {
             }else{
 
                 Log.e(TAG, "Location Permission not granted");
-                lastLocationAvailable = false;
                 currentLocation = (new Location(LocationManager.GPS_PROVIDER));
                 currentLocation.reset();
                 internalOnFragmentChanged(new FormFragment());
@@ -386,7 +377,6 @@ public class MainActivity extends AppCompatActivity {
         }catch(SecurityException s){
 
             Log.e(TAG, "Security Exception: Permission probably not found");
-            lastLocationAvailable = false;
             currentLocation = (new Location(LocationManager.GPS_PROVIDER));
             currentLocation.reset();
 
@@ -396,8 +386,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getLastLocation(){
-
-        lastLocationAvailable = false;
 
         checkLocationPermission();
 
@@ -417,12 +405,10 @@ public class MainActivity extends AppCompatActivity {
                                 if (location != null) {
                                     //getAddress(location);
                                     Log.i(TAG, "Location returned non null: "+location.toString());
-                                    lastLocationAvailable = true;
                                     currentLocation = location;
 
                                 }else{
                                     Log.i(TAG, "location returned null");
-                                    lastLocationAvailable = false;
                                     currentLocation = (new Location(LocationManager.GPS_PROVIDER));
                                     currentLocation.reset();
 
@@ -435,7 +421,6 @@ public class MainActivity extends AppCompatActivity {
                                 Log.d(TAG, "Error trying to get last GPS location");
                                 e.printStackTrace();
 
-                                lastLocationAvailable = false;
                                 currentLocation = (new Location(LocationManager.GPS_PROVIDER));
                                 currentLocation.reset();
 
@@ -445,7 +430,6 @@ public class MainActivity extends AppCompatActivity {
             }else{
 
                 Log.e(TAG, "Location Permission not granted");
-                lastLocationAvailable = false;
                 currentLocation = (new Location(LocationManager.GPS_PROVIDER));
                 currentLocation.reset();
 
@@ -454,7 +438,6 @@ public class MainActivity extends AppCompatActivity {
         }catch(SecurityException s){
 
             Log.e(TAG, "Security Exception: Permission probably not found");
-            lastLocationAvailable = false;
             currentLocation = (new Location(LocationManager.GPS_PROVIDER));
             currentLocation.reset();
 

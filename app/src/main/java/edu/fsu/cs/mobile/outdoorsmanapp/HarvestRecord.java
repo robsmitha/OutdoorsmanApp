@@ -94,8 +94,8 @@ public class HarvestRecord {
         String type = (String) userSnapshot.child(TYPE).getValue();
         int typeId = (int) ((long)userSnapshot.child(TYPE_ID).getValue());
         long date = (long) userSnapshot.child(DATE).getValue();
-        double lat = (double) userSnapshot.child(LAT).getValue();
-        double lng = (double) userSnapshot.child(LNG).getValue();
+        double lat = ((Number)userSnapshot.child(LAT).getValue()).doubleValue();
+        double lng = ((Number)userSnapshot.child(LNG).getValue()).doubleValue();
         int id = (int) ((long)userSnapshot.child(ID).getValue());
 
         return (new HarvestRecord(null)).setUserName(username).setEmail(email)

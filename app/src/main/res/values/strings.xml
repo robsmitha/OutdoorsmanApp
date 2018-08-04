@@ -20,7 +20,7 @@
     <string name="pickLoc">Pick Location</string>
     <string name="recCurLoc">Record Current Location</string>
     <string name="latitude">Latitude: </string>
-    <string name="longitude">Longitude: </string>
+    <string name="longitude">\nLongitude: </string>
     <string name="chooseDate">Choose Date</string>
     <string name="chooseLoc">Choose Location</string>
     <string name="formSubmitted">Form Type submitted at: </string>
