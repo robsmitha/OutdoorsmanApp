@@ -60,9 +60,6 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(true);
         getSupportActionBar().setIcon(R.drawable.ic_public_black_24dp);
 
-        //AccountFragment accountFragment = new AccountFragment();
-        //OnFragmentReplaced(accountFragment);
-
         MainFragment mainFragment = new MainFragment();
         OnFragmentReplaced(mainFragment);
 
@@ -531,13 +528,6 @@ public class MainActivity extends AppCompatActivity {
                 //OnFragmentReplaced(new FeedFragment());
                 break;
             case R.id.action_map:
-                /*
-                MapFragment mapFragment = new MapFragment();
-                Bundle bundle = new Bundle();
-                bundle.putInt(MapFragment.ARG_PARAM_HARVEST_ID, getHarvestRecordArrayList().get(0).getId());
-                mapFragment.setArguments(bundle);
-                */
-
                 OnFragmentReplaced(new MapFragment());
 
                 break;

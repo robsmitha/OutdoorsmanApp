@@ -141,14 +141,13 @@ public class FormFragment extends Fragment {
         });
 
 
-        //TODO: determine if phone has location services on
-        //TODO: apply "checked" logic / show TextViews if not checked
 
         getLastLocation();
 
         final Switch switchCurrentLocation = view.findViewById(R.id.switchRecordLocation);
         switchCurrentLocation.setVisibility(View.VISIBLE);
         switchCurrentLocation.setChecked(true);
+        //TODO: apply "checked" logic / show TextViews if not checked
 
         switchCurrentLocation.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -282,9 +281,8 @@ public class FormFragment extends Fragment {
 
 
             //Add this record to the HarvestRecordArrayList in MainActivity
-            //TODO: add records to firebase, get location serivce, check if switches for date & calendar are "checked"
             HarvestRecord harvestRecord = new HarvestRecord(((MainActivity)getActivity()).getCurrentUser());
-            harvestRecord.setId(harvestRecordCounter++);    //TODO: use id from firebase
+            harvestRecord.setId(harvestRecordCounter++);
             harvestRecord.setTypeId(typeId);
             harvestRecord.setType(formType);
             harvestRecord.setDate(timeStamp);

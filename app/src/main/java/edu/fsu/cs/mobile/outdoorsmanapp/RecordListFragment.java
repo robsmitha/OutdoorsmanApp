@@ -57,16 +57,6 @@ public class RecordListFragment extends Fragment {
 
         if(!arrayList.isEmpty()){
 
-            //TODO: Add sort when harvestIdis
-            /*
-            Collections.sort(arrayList, new Comparator<HarvestRecord>() {
-                @Override
-                public int compare(HarvestRecord lhs, HarvestRecord rhs) {
-                    // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
-                    return Long.compare(rhs.getDate(), lhs.getDate());
-                }
-            });
-            */
             RecordListAdapter mAdapter = new RecordListAdapter(getActivity(), arrayList);
 
             mRecyclerView.setAdapter(mAdapter);
@@ -78,8 +68,7 @@ public class RecordListFragment extends Fragment {
 
                     HarvestRecord harvestRecord = (HarvestRecord)data;
                     Bundle bundle = new Bundle();
-                    bundle.putInt(mHarvestID, harvestRecord.getId());   //harvest record ID matches the position for debugging purposes
-                    //TODO:base harvestId on firebase recordId
+                    bundle.putInt(mHarvestID, harvestRecord.getId());
                     MapFragment mapFragment = new MapFragment();
                     mapFragment.setArguments(bundle);
                     ((MainActivity)getActivity()).OnFragmentReplaced(mapFragment);

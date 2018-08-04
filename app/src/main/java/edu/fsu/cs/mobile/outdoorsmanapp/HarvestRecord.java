@@ -27,7 +27,7 @@ public class HarvestRecord {
     private String userName;
     private String email;
     private String type;
-    //private LatLng latLng;
+
 
 
     HarvestRecord(FirebaseUser mUser){

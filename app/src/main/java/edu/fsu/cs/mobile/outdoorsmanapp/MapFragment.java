@@ -82,7 +82,6 @@ public class MapFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            //mParamHarvestId = getArguments().getInt(ARG_PARAM_HARVEST_ID);
             mKeyId = getArguments().getInt(ARG_PARAM_HARVEST_ID);
             mParamHarvestId = getPosFromKey(mKeyId);
         }
@@ -136,7 +135,6 @@ public class MapFragment extends Fragment {
                     public boolean  onMarkerClick(Marker marker) {
 
                         HarvestRecord harvestRecord = (HarvestRecord)marker.getTag();
-                        //mParamHarvestId = harvestRecord.getId();
 
                         mKeyId = harvestRecord.getId();
                         mParamHarvestId = getPosFromKey(mKeyId);
@@ -369,7 +367,7 @@ public class MapFragment extends Fragment {
                 harvestRecordCounter = ((MainActivity)getActivity()).getHarvestRecordArrayList().size();
 
                 HarvestRecord harvestRecord = new HarvestRecord();
-                harvestRecord.setId(++harvestRecordCounter);    //TODO: use id from firebase
+                harvestRecord.setId(++harvestRecordCounter);
                 harvestRecord.setTypeId(formTypeId);
                 harvestRecord.setType(formType);
                 harvestRecord.setDate(harvestDate);
@@ -419,9 +417,6 @@ public class MapFragment extends Fragment {
                 textView.setText(getString(R.string.pleaseConfirm)+formType+getString(R.string.formDot));
                 textView.setVisibility(View.VISIBLE);
                 button.setVisibility(View.VISIBLE);
-
-                //ConfirmFormType(formType,position); //NOTE: passing the position int as the typeId, see ~/res/values/R.arrays.form_types
-                //TODO: Back up with data, set up web api or leave as it (hardcoded in strings.xml
 
             }
         });

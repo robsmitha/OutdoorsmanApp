@@ -250,35 +250,23 @@ public class FirebaseManager {
 
     private void addToDatabase(HarvestRecord hr){
         String key = mDatabase.child(RECORDS_TABLE).push().getKey();
-        //TODO figure out id scenario. Firebase generated key/ID is not int, but MapFragment dependent on int id
+
         hr.setId(key.hashCode());
 
         Map<String, Object> postValues = hr.toMap();
         Map<String, Object> childUpdates = new HashMap<>();
         childUpdates.put("/" + RECORDS_TABLE + "/" + key, postValues);
         mDatabase.updateChildren(childUpdates);
-
-
-        //mTable = mDatabase.child(MAIN_TABLE).child(mSessionName);
-
-        //mTable.setValue(loc);
-
     }
 
     private void addToDatabase(UserRecord ur){
-        //String key = mDatabase.child(MAIN_TABLE).push().getKey();
+
         String key = ur.getKeyFromEmail();
 
         Map<String, Object> postValues = ur.toMap();
         Map<String, Object> childUpdates = new HashMap<>();
         childUpdates.put("/" + USER_TABLE + "/" + key, postValues);
         mDatabase.updateChildren(childUpdates);
-
-
-        //mTable = mDatabase.child(MAIN_TABLE).child(mSessionName);
-
-        //mTable.setValue(loc);
-
     }
 
     public void updateRecords(HarvestRecord hr){
