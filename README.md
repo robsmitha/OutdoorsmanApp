@@ -16,3 +16,4 @@ BUG REPORT:
 - Google maps must be opened before opening the app to make sure current location works right
 - When the app asks for Location Permission the first time, it must be approved. If it is denied the first time, the app refuses to work until a restart
 - Sometimes the google sigin method acts slow and almost gets stuck in a loop. It usually eventually works, but it may not
+- App crashing on emulators running OREO with API Lvl 27, using MARSHMALLOW API Lvl 23 works fine -RS
